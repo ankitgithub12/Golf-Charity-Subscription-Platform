@@ -257,19 +257,40 @@ const Dashboard = () => {
           </div>
 
           {/* Participation Summary */}
-          <div className="side-card glass-card">
+          <div className="side-card participation-summary-card glass-card">
             <div className="side-card-header">
-              <Trophy size={18} />
+              <div className="icon-glow-alt">
+                <Trophy size={18} />
+              </div>
               <h4>Participation Summary</h4>
             </div>
-            <div className="sub-details">
-              <div className="summary-item">
-                <span className="label">Draws Entered</span>
-                <span className="val">{winnings?.length || 0}</span>
+            
+            <div className="summary-stats-grid">
+              <div className="summary-stat-item">
+                <div className="stat-icon-wrap">
+                  <Trophy size={16} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Draws Entered</span>
+                  <span className="stat-value">{winnings?.length || 0}</span>
+                </div>
               </div>
-              <div className="summary-item">
-                <span className="label">Next Draw</span>
-                <span className="val">{latestDraw?.month || 'TBD'}</span>
+              
+              <div className="summary-stat-item">
+                <div className="stat-icon-wrap">
+                  <Calendar size={16} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Next Draw</span>
+                  <span className="stat-value highlight">{latestDraw?.month || 'TBD'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="summary-status-footer">
+              <div className="status-dot-wrap">
+                <div className="status-dot pulse-emerald"></div>
+                <span>Currently Active in System</span>
               </div>
             </div>
           </div>
@@ -589,6 +610,89 @@ const Dashboard = () => {
 
         .icon-btn.edit { color: var(--primary); }
         
+        /* Redesigned Participation Summary */
+        .participation-summary-card {
+           padding: 1.5rem !important;
+           border: 1px solid var(--glass-border);
+           background: linear-gradient(135deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.6));
+           position: relative;
+        }
+
+        .icon-glow-alt {
+          width: 32px; height: 32px;
+          background: rgba(245, 158, 11, 0.1);
+          border-radius: 8px;
+          display: flex; align-items: center; justify-content: center;
+          color: var(--accent);
+          filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.2));
+        }
+
+        .summary-stats-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+          margin-top: 1.5rem;
+        }
+
+        .summary-stat-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          transition: var(--transition);
+        }
+
+        .summary-stat-item:hover {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.1);
+          transform: translateX(4px);
+        }
+
+        .stat-icon-wrap {
+          width: 36px; height: 36px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.05);
+          display: flex; align-items: center; justify-content: center;
+          color: var(--text-dim);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-content { display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; color: var(--text-dim); }
+        .stat-value { font-size: 1.125rem; font-weight: 900; color: var(--text-main); }
+        .stat-value.highlight { color: var(--primary); }
+
+        .summary-status-footer {
+          margin-top: 1.5rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-dot-wrap {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          font-size: 0.75rem;
+          color: var(--text-dim);
+          font-weight: 600;
+        }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .pulse-emerald { 
+          background: #10b981; 
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+          animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+          70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
         .sub-details { font-size: 0.9375rem; }
         .sub-plan { font-weight: 700; margin-bottom: 0.25rem; }
         .sub-renewal { color: var(--text-dim); font-size: 0.8125rem; }
