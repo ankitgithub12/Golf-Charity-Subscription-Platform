@@ -142,4 +142,38 @@ const getAnalytics = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUserById, updateUser, getAnalytics };
+/**
+ * PUT /api/admin/scores/:id  — edit any user's score
+ */
+const editScore = async (req, res) => {
+  try {
+    const { value, datePlayed, notes } = req.body;
+    if (value !== undefined && (value < 1 || value > 45)) {
+      return res.status(400).json({ success: false, message: 'Score must be between 1 and 45' });
+    }
+    const score = await Score.findByIdAndUpdate(
+      req.params.id,
+      { ...(value !== undefined && { value }), ...(datePlayed && { datePlayed }), ...(notes !== undefined && { notes }) },
+      { new: true, runValidators: true }
+    );
+    if (!score) return res.status(404).json({ success: false, message: 'Score not found' });
+    res.json({ success: true, message: 'Score updated', score });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * DELETE /api/admin/scores/:id  — delete any user's score
+ */
+const deleteScore = async (req, res) => {
+  try {
+    const score = await Score.findByIdAndDelete(req.params.id);
+    if (!score) return res.status(404).json({ success: false, message: 'Score not found' });
+    res.json({ success: true, message: 'Score deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { getUsers, getUserById, updateUser, getAnalytics, editScore, deleteScore };

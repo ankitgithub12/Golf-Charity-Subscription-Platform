@@ -191,6 +191,24 @@ const Dashboard = () => {
             )}
           </div>
 
+          {/* Participation Summary */}
+          <div className="side-card glass-card">
+            <div className="side-card-header">
+              <Trophy size={18} />
+              <h4>Participation Summary</h4>
+            </div>
+            <div className="sub-details">
+              <div className="summary-item">
+                <span className="label">Draws Entered</span>
+                <span className="val">{winnings?.length || 0}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">Next Draw</span>
+                <span className="val">{latestDraw?.month || 'TBD'}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Charity Impact */}
           <div className="side-card glass-card">
             <div className="side-card-header">

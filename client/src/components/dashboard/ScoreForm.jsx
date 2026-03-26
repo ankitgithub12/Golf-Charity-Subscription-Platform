@@ -35,15 +35,19 @@ const ScoreForm = ({ onAdd, loading, initialValues = null, isEditing = false }) 
       <div className="form-row">
         <div className="form-group">
           <label>Stableford Points (1-45)</label>
-          <input 
-            type="number" 
-            min="1" 
-            max="45" 
-            className="form-input" 
-            required 
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
+          <div className="input-with-helper">
+            <input 
+              type="number" 
+              min="1" 
+              max="45" 
+              className="form-input" 
+              required 
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Enter 1-45"
+            />
+            <span className="input-helper">Points must be between 1 and 45.</span>
+          </div>
         </div>
         <div className="form-group">
           <label>Date Played</label>

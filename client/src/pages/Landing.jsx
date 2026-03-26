@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Trophy, Heart, Target, ChevronRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, Trophy, Heart, Target, ChevronRight, CheckCircle, ExternalLink, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
 
 const Landing = () => {
   const fadeInUp = {
@@ -113,6 +114,9 @@ const Landing = () => {
           ))}
         </div>
       </section>
+
+      {/* Featured Charities Section */}
+      <FeaturedCharities />
 
       {/* Impact Section */}
       <section className="impact-banner">
@@ -384,6 +388,156 @@ const Landing = () => {
         }
       `}</style>
     </div>
+  );
+};
+
+const FeaturedCharities = () => {
+  const [charities, setCharities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await api.get('/charities?featured=true');
+        setCharities(res.data.charities.slice(0, 3)); // Show top 3 featured
+      } catch (err) {
+        console.error("Error fetching featured charities", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  if (loading && charities.length === 0) return null;
+  if (!loading && charities.length === 0) return null;
+
+  return (
+    <section className="featured-charities container section">
+      <div className="section-header">
+        <span className="badge">Making a Difference</span>
+        <h2>Charity Spotlights</h2>
+        <p>Your subscription supports these incredible organizations. Choose who you want to champion.</p>
+      </div>
+
+      <div className="charity-spotlight-grid">
+        {charities.map((charity, i) => (
+          <motion.div 
+            key={charity._id} 
+            className="charity-spotlight-card glass-card"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+          >
+            <div className="charity-card-image">
+              <img src={charity.coverImage || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=800"} alt={charity.name} />
+              <div className="charity-category-badge">{charity.category}</div>
+            </div>
+            <div className="charity-card-content">
+              <h3>{charity.name}</h3>
+              <p>{charity.shortDescription || charity.description.substring(0, 100) + '...'}</p>
+              <div className="charity-card-footer">
+                <div className="supporters">
+                  <strong>{charity.supporterCount}</strong>
+                  <span>Supporters</span>
+                </div>
+                <Link to={`/charities/${charity._id}`} className="icon-link">
+                  Learn More <ExternalLink size={14} />
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <style>{`
+        .charity-spotlight-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
+          margin-top: 3rem;
+        }
+        .charity-spotlight-card {
+          padding: 0 !important;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+        .charity-card-image {
+          position: relative;
+          height: 200px;
+        }
+        .charity-card-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .charity-category-badge {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: var(--primary);
+          color: white;
+          padding: 0.25rem 0.75rem;
+          border-radius: var(--radius-full);
+          font-size: 0.7rem;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+        .charity-card-content {
+          padding: 1.5rem;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+        .charity-card-content h3 {
+          margin-bottom: 0.75rem;
+          font-size: 1.25rem;
+        }
+        .charity-card-content p {
+          color: var(--text-muted);
+          font-size: 0.875rem;
+          line-height: 1.6;
+          margin-bottom: 1.5rem;
+          flex: 1;
+        }
+        .charity-card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 1rem;
+          border-top: 1px solid var(--glass-border);
+        }
+        .supporters {
+          display: flex;
+          flex-direction: column;
+        }
+        .supporters strong {
+          color: var(--primary);
+          font-size: 1.125rem;
+        }
+        .supporters span {
+          font-size: 0.65rem;
+          color: var(--text-dim);
+          text-transform: uppercase;
+          font-weight: 700;
+        }
+        .icon-link {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: var(--text-main);
+        }
+        @media (max-width: 1024px) {
+          .charity-spotlight-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+    </section>
   );
 };
 

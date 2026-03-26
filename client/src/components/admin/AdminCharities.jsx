@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit2, Trash2, Image as ImageIcon, Loader, CheckCircle, XCircle, Heart, Activity, BookOpen, Leaf, Trophy, Users } from 'lucide-react';
+import { Plus, Edit2, Trash2, Image as ImageIcon, Loader, CheckCircle, XCircle, Heart, Activity, BookOpen, Leaf, Trophy, Users, Star, Calendar, X } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -15,7 +15,11 @@ const AdminCharities = () => {
     category: 'health',
     website: '',
     registrationNumber: '',
+    featured: false
   });
+  const [selectedCharity, setSelectedCharity] = useState(null);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [eventData, setEventData] = useState({ title: '', date: '', location: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -67,14 +71,42 @@ const AdminCharities = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this charity? This will affect users supporting it.")) return;
+  const toggleFeatured = async (id, current) => {
     try {
-      await api.delete(`/charities/${id}`);
-      setCharities(charities.filter(c => c._id !== id));
-      toast.success("Charity deleted");
+      await api.put(`/charities/${id}`, { featured: !current });
+      setCharities(charities.map(c => c._id === id ? { ...c, featured: !current } : c));
+      toast.success("Featured status updated");
     } catch (err) {
-      toast.error("Failed to delete");
+      toast.error("Failed to update featured status");
+    }
+  };
+
+  const handleAddEvent = async (e) => {
+    e.preventDefault();
+    if (!selectedCharity) return;
+    setSubmitting(true);
+    try {
+      const res = await api.post(`/charities/${selectedCharity._id}/events`, eventData);
+      setCharities(charities.map(c => c._id === selectedCharity._id ? res.data.charity : c));
+      setSelectedCharity(res.data.charity);
+      setShowEventForm(false);
+      setEventData({ title: '', date: '', location: '', description: '' });
+      toast.success("Event added");
+    } catch (err) {
+      toast.error("Failed to add event");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteEvent = async (charityId, eventId) => {
+    try {
+      const res = await api.delete(`/charities/${charityId}/events/${eventId}`);
+      setCharities(charities.map(c => c._id === charityId ? res.data.charity : c));
+      setSelectedCharity(res.data.charity);
+      toast.success("Event removed");
+    } catch (err) {
+      toast.error("Failed to remove event");
     }
   };
 
@@ -150,6 +182,8 @@ const AdminCharities = () => {
                 <span className="capitalize">{charity.category}</span>
               </div>
               <div className="item-actions">
+                <button className={`icon-btn ${charity.featured ? 'featured' : ''}`} onClick={() => toggleFeatured(charity._id, charity.featured)}><Star size={16} /></button>
+                <button className="icon-btn" onClick={() => setSelectedCharity(charity)}><Calendar size={16} /></button>
                 <button className="icon-btn" onClick={() => handleEdit(charity)}><Edit2 size={16} /></button>
                 <button className="icon-btn delete" onClick={() => handleDelete(charity._id)}><Trash2 size={16} /></button>
               </div>
@@ -162,6 +196,53 @@ const AdminCharities = () => {
           </div>
         ))}
       </div>
+
+      {selectedCharity && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-card event-modal">
+            <div className="modal-header">
+              <Calendar size={20} className="text-primary" />
+              <div>
+                <h3>Events for {selectedCharity.name}</h3>
+                <p>Manage upcoming golf days and fundraisers</p>
+              </div>
+              <button className="close-btn" onClick={() => setSelectedCharity(null)}><X size={20} /></button>
+            </div>
+
+            <div className="modal-body">
+              <button className="btn btn-secondary btn-sm mb-4" onClick={() => setShowEventForm(!showEventForm)}>
+                {showEventForm ? 'Cancel' : <><Plus size={14} /> Add Event</>}
+              </button>
+
+              {showEventForm && (
+                <form onSubmit={handleAddEvent} className="event-form mb-6 glass-card p-4">
+                  <div className="form-group mb-2">
+                    <input type="text" placeholder="Event Title" className="form-input" required value={eventData.title} onChange={e => setEventData({...eventData, title: e.target.value})} />
+                  </div>
+                  <div className="form-row mb-2">
+                    <input type="date" className="form-input" required value={eventData.date} onChange={e => setEventData({...eventData, date: e.target.value})} />
+                    <input type="text" placeholder="Location" className="form-input" value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} />
+                  </div>
+                  <textarea placeholder="Description" className="form-input h-20 mb-3" value={eventData.description} onChange={e => setEventData({...eventData, description: e.target.value})}></textarea>
+                  <button className="btn btn-primary btn-sm btn-full" disabled={submitting}>Save Event</button>
+                </form>
+              )}
+
+              <div className="events-list">
+                {selectedCharity.events?.length > 0 ? selectedCharity.events.map(event => (
+                  <div key={event._id} className="event-item">
+                    <div className="event-info">
+                      <strong>{event.title}</strong>
+                      <span className="text-dim">{new Date(event.date).toLocaleDateString()} • {event.location}</span>
+                    </div>
+                    <button className="icon-btn delete" onClick={() => handleDeleteEvent(selectedCharity._id, event._id)}><Trash2 size={14} /></button>
+                  </div>
+                )) : <p className="text-dim text-center py-4">No events scheduled.</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .section-actions { margin-bottom: 2rem; }
@@ -176,8 +257,26 @@ const AdminCharities = () => {
         .item-title h4 { margin: 0; font-size: 1rem; }
         .item-title span { font-size: 0.75rem; color: var(--text-dim); }
         .item-actions { display: flex; gap: 0.25rem; }
+        .icon-btn.featured { color: var(--accent); }
         .item-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
         .item-footer { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid var(--glass-border); padding-top: 1rem; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-content { width: 100%; max-width: 500px; padding: 2.5rem !important; position: relative; }
+        .modal-header { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; }
+        
+        .event-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 0.5rem; }
+        .event-info { display: flex; flex-direction: column; }
+        .event-info strong { font-size: 0.9375rem; }
+        .event-info span { font-size: 0.75rem; }
+        
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .h-20 { height: 80px; resize: none; }
+        .py-4 { padding: 1rem 0; }
 
         .category-picker {
           display: grid;

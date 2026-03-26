@@ -7,6 +7,9 @@ const {
   updateCharity,
   deleteCharity,
   selectCharity,
+  donate,
+  addEvent,
+  removeEvent,
 } = require('../controllers/charityController');
 const { protect, adminOnly, subscribed } = require('../middleware/auth');
 const { uploadCharityImage } = require('../middleware/upload');
@@ -19,9 +22,16 @@ router.get('/:id', getCharityById);
 // User — select a charity (must be subscribed)
 router.post('/select', protect, subscribed, validate(charitySelectSchema), selectCharity);
 
+// User — independent donation (must be logged in)
+router.post('/:id/donate', protect, donate);
+
 // Admin CRUD
 router.post('/', protect, adminOnly, uploadCharityImage.single('coverImage'), validate(charitySchema), createCharity);
 router.put('/:id', protect, adminOnly, uploadCharityImage.single('coverImage'), updateCharity);
 router.delete('/:id', protect, adminOnly, deleteCharity);
+
+// Admin — events management
+router.post('/:id/events', protect, adminOnly, addEvent);
+router.delete('/:id/events/:eventId', protect, adminOnly, removeEvent);
 
 module.exports = router;

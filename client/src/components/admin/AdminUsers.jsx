@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MoreVertical, Edit2, Shield, UserX, Loader } from 'lucide-react';
+import { Search, MoreVertical, Edit2, Shield, UserX, Loader, Trophy, Trash2, X } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -7,6 +7,9 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userScores, setUserScores] = useState([]);
+  const [scoresLoading, setScoresLoading] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -102,6 +105,9 @@ const AdminUsers = () => {
                 <td>₹{(user.totalDonated / 100 || 0).toFixed(2)}</td>
                 <td>
                   <div className="action-btns">
+                    <button className="icon-btn" title="Manage Scores" onClick={() => { setSelectedUser(user); fetchUserScores(user._id); }}>
+                      <Trophy size={16} />
+                    </button>
                     <button className="icon-btn" title="Toggle Admin" onClick={() => toggleAdmin(user._id, user.role)}>
                       <Shield size={16} />
                     </button>
@@ -119,6 +125,44 @@ const AdminUsers = () => {
           </tbody>
         </table>
       </div>
+
+      {selectedUser && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-card score-manage-modal">
+            <div className="modal-header">
+              <Trophy size={20} className="text-primary" />
+              <div>
+                <h3>Scores for {selectedUser.name}</h3>
+                <p>Manage 5-score rolling history</p>
+              </div>
+              <button className="close-btn" onClick={() => setSelectedUser(null)}><X size={20} /></button>
+            </div>
+            
+            <div className="modal-body">
+              {scoresLoading ? (
+                <div className="loading-state h-40"><Loader className="animate-spin" /></div>
+              ) : userScores.length > 0 ? (
+                <div className="admin-scores-list">
+                  {userScores.map(score => (
+                    <div key={score._id} className="admin-score-item">
+                      <div className="score-val">{score.value}</div>
+                      <div className="score-info">
+                        <strong>{new Date(score.datePlayed).toLocaleDateString()}</strong>
+                        {score.notes && <span>{score.notes}</span>}
+                      </div>
+                      <button className="icon-btn delete" onClick={() => deleteUserScore(score._id)}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="no-data">No scores found for this user.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .table-controls { padding: 1rem 1.5rem !important; margin-bottom: 2rem; }
@@ -147,9 +191,24 @@ const AdminUsers = () => {
         .badge.error { color: var(--error); }
         
         .action-btns { display: flex; gap: 0.5rem; }
-        .icon-btn { padding: 0.5rem; color: var(--text-dim); border-radius: 4px; }
+        .icon-btn { padding: 0.5rem; color: var(--text-dim); border-radius: 4px; border: none; background: none; cursor: pointer; transition: var(--transition); }
         .icon-btn:hover { background: var(--glass); color: var(--text-main); }
         .icon-btn.delete:hover { color: var(--error); }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-content { width: 100%; max-width: 500px; padding: 2rem !important; position: relative; }
+        .modal-header { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-start; }
+        .modal-header h3 { margin: 0; font-size: 1.25rem; }
+        .modal-header p { margin: 0; font-size: 0.8125rem; color: var(--text-dim); }
+        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; }
+        
+        .admin-scores-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .admin-score-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border); }
+        .score-val { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+        .score-info { flex: 1; display: flex; flex-direction: column; }
+        .score-info span { font-size: 0.75rem; color: var(--text-dim); }
+        .no-data { text-align: center; color: var(--text-dim); padding: 2rem; }
+        .text-primary { color: var(--primary); }
       `}</style>
     </div>
   );

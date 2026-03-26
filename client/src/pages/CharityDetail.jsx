@@ -13,6 +13,8 @@ const CharityDetail = () => {
   const [charity, setCharity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState(false);
+  const [donateAmount, setDonateAmount] = useState('');
+  const [donating, setDonating] = useState(false);
 
   useEffect(() => {
     const fetchCharity = async () => {
@@ -50,6 +52,31 @@ const CharityDetail = () => {
       toast.error(err.response?.data?.message || "Failed to select charity");
     } finally {
       setSelecting(false);
+    }
+  };
+
+  const handleDonate = async () => {
+    if (!user) {
+      toast.error("Please login to donate");
+      return;
+    }
+    if (!donateAmount || isNaN(donateAmount) || donateAmount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    try {
+      setDonating(true);
+      await api.post(`/charities/${id}/donate`, { amount: donateAmount });
+      toast.success(`Thank you for your donation of ₹${donateAmount}!`);
+      setDonateAmount('');
+      // Refresh charity stats
+      const res = await api.get(`/charities/${id}`);
+      setCharity(res.data.charity);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Donation failed");
+    } finally {
+      setDonating(false);
     }
   };
 
@@ -144,6 +171,34 @@ const CharityDetail = () => {
                 </button>
               )}
               <p className="impact-note">Selecting this charity will redirect 10% (or more) of your subscription fees here.</p>
+            </div>
+
+            {/* Independent Donation Box */}
+            <div className="impact-box glass-card mt-6">
+              <h3>Direct Donation</h3>
+              <p className="text-sm text-dim mb-4">Make a one-off contribution to support this cause immediately.</p>
+              
+              <div className="donation-form">
+                <div className="amount-input-wrapper mb-4">
+                  <span className="currency-prefix">₹</span>
+                  <input 
+                    type="number" 
+                    placeholder="Enter amount" 
+                    className="form-input"
+                    value={donateAmount}
+                    onChange={(e) => setDonateAmount(e.target.value)}
+                    min="1"
+                  />
+                </div>
+                <button 
+                  className="btn btn-secondary btn-full"
+                  onClick={handleDonate}
+                  disabled={donating || !donateAmount}
+                >
+                  {donating ? <Loader size={18} className="animate-spin" /> : <>Make Donation</>}
+                </button>
+              </div>
+              <p className="impact-note">100% of direct donations go to the charity (minus transaction fees).</p>
             </div>
           </div>
         </div>
@@ -242,6 +297,15 @@ const CharityDetail = () => {
           font-size: 0.75rem;
           text-align: center;
         }
+        
+        .mt-6 { margin-top: 1.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .text-sm { font-size: 0.875rem; }
+        
+        .donation-form { display: flex; flex-direction: column; }
+        .amount-input-wrapper { position: relative; }
+        .currency-prefix { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--primary); }
+        .amount-input-wrapper .form-input { padding-left: 2.5rem; }
         
         @media (max-width: 1024px) {
           .detail-layout { grid-template-columns: 1fr; }

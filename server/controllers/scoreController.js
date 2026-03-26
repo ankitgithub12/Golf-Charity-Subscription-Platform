@@ -11,6 +11,11 @@ const addScore = async (req, res) => {
     const { value, datePlayed, notes } = req.body;
     const userId = req.user._id;
 
+    // Stableford range validation
+    if (value < 1 || value > 45) {
+      return res.status(400).json({ success: false, message: 'Score must be between 1 and 45 (Stableford format)' });
+    }
+
     // Count existing scores
     const count = await Score.countDocuments({ userId });
 
@@ -55,7 +60,12 @@ const updateScore = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Score not found' });
 
     const { value, datePlayed, notes } = req.body;
-    if (value !== undefined) score.value = value;
+    if (value !== undefined) {
+      if (value < 1 || value > 45) {
+        return res.status(400).json({ success: false, message: 'Score must be between 1 and 45 (Stableford format)' });
+      }
+      score.value = value;
+    }
     if (datePlayed !== undefined) score.datePlayed = datePlayed;
     if (notes !== undefined) score.notes = notes;
     await score.save();

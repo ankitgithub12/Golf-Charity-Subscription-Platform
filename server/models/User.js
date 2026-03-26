@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema(
     // Subscription status snapshot (updated via webhook)
     subscriptionStatus: {
       type: String,
-      enum: ['none', 'active', 'cancelled', 'expired', 'trialing'],
+      enum: ['none', 'active', 'cancelled', 'expired', 'trialing', 'past_due'],
       default: 'none',
     },
     // Charity the user has selected to support

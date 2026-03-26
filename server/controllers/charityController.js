@@ -128,4 +128,71 @@ const selectCharity = async (req, res) => {
   }
 };
 
-module.exports = { getCharities, getCharityById, createCharity, updateCharity, deleteCharity, selectCharity };
+/**
+ * POST /api/charities/:id/donate  [user] — independent (non-subscription) donation
+ */
+const donate = async (req, res) => {
+  try {
+    const { amount } = req.body; // amount in paise (integer)
+    if (!amount || amount < 1) {
+      return res.status(400).json({ success: false, message: 'Valid donation amount is required' });
+    }
+
+    const charity = await Charity.findById(req.params.id);
+    if (!charity || !charity.isActive)
+      return res.status(404).json({ success: false, message: 'Charity not found' });
+
+    // Increment charity total donations
+    await Charity.findByIdAndUpdate(req.params.id, { $inc: { totalDonations: amount } });
+
+    // Update user's total donated
+    await User.findByIdAndUpdate(req.user._id, { $inc: { totalDonated: amount } });
+
+    res.json({ success: true, message: `Donation of ₹${(amount / 100).toFixed(2)} recorded successfully` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * POST /api/charities/:id/events  [admin] — add an event to a charity
+ */
+const addEvent = async (req, res) => {
+  try {
+    const { title, description, date, location } = req.body;
+    if (!title || !date) {
+      return res.status(400).json({ success: false, message: 'Event title and date are required' });
+    }
+
+    const charity = await Charity.findByIdAndUpdate(
+      req.params.id,
+      { $push: { events: { title, description: description || '', date, location: location || '' } } },
+      { new: true }
+    );
+    if (!charity) return res.status(404).json({ success: false, message: 'Charity not found' });
+
+    res.json({ success: true, message: 'Event added', charity });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * DELETE /api/charities/:id/events/:eventId  [admin] — remove a charity event
+ */
+const removeEvent = async (req, res) => {
+  try {
+    const charity = await Charity.findByIdAndUpdate(
+      req.params.id,
+      { $pull: { events: { _id: req.params.eventId } } },
+      { new: true }
+    );
+    if (!charity) return res.status(404).json({ success: false, message: 'Charity not found' });
+
+    res.json({ success: true, message: 'Event removed', charity });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { getCharities, getCharityById, createCharity, updateCharity, deleteCharity, selectCharity, donate, addEvent, removeEvent };

@@ -11,10 +11,10 @@ const DrawResults = () => {
   useEffect(() => {
     const fetchDraws = async () => {
       try {
-        const res = await api.get('/draws');
+        const res = await api.get('/draws/public');
         setDraws(res.data.draws);
       } catch (err) {
-        console.error("Error fetching draws", err);
+        console.error('Error fetching draws', err);
       } finally {
         setLoading(false);
       }
@@ -63,7 +63,7 @@ const DrawResults = () => {
                 <IndianRupee size={18} />
                 <div>
                   <span className="label">Total Pool</span>
-                  <span className="val">₹{(draws[0].results?.totalPool / 100 || 0).toFixed(2)}</span>
+                  <span className="val">₹{((draws[0].pool?.totalPool || 0) / 100).toFixed(2)}</span>
                 </div>
               </div>
               {draws[0].jackpotCarriedOver && (
@@ -92,7 +92,7 @@ const DrawResults = () => {
               {draw.numbers.map((n, j) => <span key={j} className="mini-ball">{n}</span>)}
             </div>
             <div className="row-stats">
-              <span className="row-pool">₹{(draw.results?.totalPool / 100).toFixed(0)}</span>
+              <span className="row-pool">₹{((draw.pool?.totalPool || 0) / 100).toFixed(0)}</span>
               <span className="row-winners">{draw.results?.fiveMatch?.length || 0} Jackpots</span>
             </div>
             <ChevronRight className="row-arrow" size={18} />

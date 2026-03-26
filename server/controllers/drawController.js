@@ -219,4 +219,23 @@ const getDrawById = async (req, res) => {
   }
 };
 
-module.exports = { generateDraw, simulateDraw, publishDraw, getDraws, getLatestDraw, getDrawById };
+/**
+ * GET /api/draws/public — public list of published draws, no auth required
+ */
+const getPublishedDraws = async (req, res) => {
+  try {
+    const draws = await Draw.find({ status: 'published' }).sort({ createdAt: -1 });
+    // Attach pool data to each draw
+    const drawsWithPool = await Promise.all(
+      draws.map(async (d) => {
+        const pool = await PrizePool.findOne({ drawId: d._id });
+        return { ...d.toObject(), pool };
+      })
+    );
+    res.json({ success: true, draws: drawsWithPool });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { generateDraw, simulateDraw, publishDraw, getDraws, getLatestDraw, getDrawById, getPublishedDraws };

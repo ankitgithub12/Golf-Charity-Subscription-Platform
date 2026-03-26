@@ -48,7 +48,7 @@ const WinnerUpload = () => {
     if (!file) return toast.error("Please select a file");
 
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('proof', file);
 
     setUploading(true);
     try {

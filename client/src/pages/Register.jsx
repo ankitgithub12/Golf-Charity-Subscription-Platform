@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, ArrowRight, Loader, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
+import CharitySelectModal from '../components/common/CharitySelectModal';
 
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
@@ -12,6 +13,7 @@ const Register = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showCharityModal, setShowCharityModal] = useState(false);
 
   const getPasswordStrength = (pwd) => {
     if (!pwd) return { label: '', color: '', width: '0%', score: 0 };
@@ -40,8 +42,8 @@ const Register = () => {
     setLoading(true);
     try {
       await register(formData.name, formData.email, formData.password);
-      toast.success('Account created! Let\'s get started.');
-      navigate('/subscribe');
+      toast.success('Account created! Let\'s choose a charity.');
+      setShowCharityModal(true);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -51,6 +53,12 @@ const Register = () => {
 
   return (
     <div className="auth-container">
+      {showCharityModal && (
+        <CharitySelectModal 
+          onClose={() => navigate('/subscribe')} 
+          onSelect={() => navigate('/subscribe')} 
+        />
+      )}
       <div className="container auth-inner">
         <div className="auth-layout">
           <div className="auth-benefit-side desktop">

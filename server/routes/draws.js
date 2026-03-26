@@ -7,11 +7,13 @@ const {
   getDraws,
   getLatestDraw,
   getDrawById,
+  getPublishedDraws,
 } = require('../controllers/drawController');
 const { protect, adminOnly } = require('../middleware/auth');
 const { validate, drawGenerateSchema } = require('../middleware/validate');
 
-// Public
+// Public (no auth required)
+router.get('/public', getPublishedDraws);
 router.get('/latest', getLatestDraw);
 router.get('/:id', protect, getDrawById);
 router.get('/', protect, getDraws);
