@@ -283,30 +283,56 @@ const AdminCharities = () => {
 
       <div className="charities-grid">
         {charities.map(charity => (
-          <div key={charity._id} className="charity-item glass-card hover-glow">
-            <div className="item-header">
-              <div className="item-icon">
-                {charity.coverImage ? (
-                  <img src={charity.coverImage} alt={charity.name} className="admin-charity-img" />
-                ) : (
-                  <Heart size={20} />
-                )}
-              </div>
-              <div className="item-title">
-                <h4>{charity.name}</h4>
-                <span className="capitalize">{charity.category}</span>
-              </div>
-              <div className="item-actions">
-                <button className={`icon-btn ${charity.featured ? 'featured' : ''}`} onClick={() => toggleFeatured(charity._id, charity.featured)}><Star size={16} /></button>
-                <button className="icon-btn" onClick={() => setSelectedCharity(charity)}><Calendar size={16} /></button>
-                <button className="icon-btn" onClick={() => handleEdit(charity)}><Edit2 size={16} /></button>
-                <button className="icon-btn delete" onClick={() => handleDelete(charity._id)}><Trash2 size={16} /></button>
-              </div>
+          <div key={charity._id} className={`charity-item glass-card premium-card ${charity.featured ? 'is-featured' : ''}`}>
+            {charity.featured && <div className="featured-ribbon"><Star size={10} fill="currentColor" /> Featured</div>}
+            
+            <div className="item-visual">
+              {charity.coverImage ? (
+                <img src={charity.coverImage} alt={charity.name} className="admin-charity-img" />
+              ) : (
+                <div className="placeholder-visual"><Heart size={32} /></div>
+              )}
+              <div className="category-pill capitalize">{charity.category}</div>
             </div>
-            <p className="item-desc">{charity.description.substring(0, 100)}...</p>
-            <div className="item-footer">
-              <span>{charity.supporterCount} Supporters</span>
-              <span>₹{(charity.totalDonations / 100).toFixed(0)} Donated</span>
+
+            <div className="item-content">
+              <div className="item-header">
+                <div className="item-title">
+                  <h4>{charity.name}</h4>
+                  <div className="reg-id">Reg: {charity.registrationNumber || 'N/A'}</div>
+                </div>
+                <div className="item-actions">
+                  <button 
+                    className={`icon-btn action-featured ${charity.featured ? 'active' : ''}`} 
+                    onClick={() => toggleFeatured(charity._id, charity.featured)}
+                    title="Toggle Featured"
+                  >
+                    <Star size={18} fill={charity.featured ? "currentColor" : "none"} />
+                  </button>
+                  <button className="icon-btn action-calendar" onClick={() => setSelectedCharity(charity)} title="Manage Events">
+                    <Calendar size={18} />
+                  </button>
+                  <button className="icon-btn action-edit" onClick={() => handleEdit(charity)} title="Edit Charity">
+                    <Edit2 size={18} />
+                  </button>
+                  <button className="icon-btn action-delete" onClick={() => handleDelete(charity._id)} title="Delete Charity">
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+              
+              <p className="item-desc">{charity.description.substring(0, 120)}...</p>
+              
+              <div className="item-stats-grid">
+                <div className="stat-pill">
+                  <Users size={14} className="text-primary" />
+                  <span>{charity.supporterCount} Supporters</span>
+                </div>
+                <div className="stat-pill highlight">
+                  <Heart size={14} className="text-error" />
+                  <span>₹{(charity.totalDonations / 100).toLocaleString()} Donated</span>
+                </div>
+              </div>
             </div>
           </div>
         ))}
@@ -335,7 +361,14 @@ const AdminCharities = () => {
                     <input type="text" placeholder="Event Title" className="form-input" required value={eventData.title} onChange={e => setEventData({...eventData, title: e.target.value})} />
                   </div>
                   <div className="form-row mb-2">
-                    <input type="date" className="form-input" required value={eventData.date} onChange={e => setEventData({...eventData, date: e.target.value})} />
+                    <input 
+                      type="date" 
+                      className="form-input" 
+                      required 
+                      min={new Date().toISOString().split('T')[0]}
+                      value={eventData.date} 
+                      onChange={e => setEventData({...eventData, date: e.target.value})} 
+                    />
                     <input type="text" placeholder="Location" className="form-input" value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} />
                   </div>
                   <textarea placeholder="Description" className="form-input h-20 mb-3" value={eventData.description} onChange={e => setEventData({...eventData, description: e.target.value})}></textarea>
@@ -360,45 +393,95 @@ const AdminCharities = () => {
       )}
 
       <style>{`
-        .section-actions { margin-bottom: 2rem; }
-        .form-wrapper { padding: 2.5rem !important; margin-bottom: 3rem; }
+        .section-actions { margin-bottom: 3rem; display: flex; justify-content: flex-end; }
+        .form-wrapper { padding: 3rem !important; margin-bottom: 4rem; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         .h-32 { height: 120px; resize: vertical; }
 
         .file-upload-zone {
-          border: 2px dashed var(--glass-border);
-          border-radius: var(--radius-sm);
-          height: 120px;
+          border: 2px dashed rgba(255,255,255,0.1);
+          border-radius: var(--radius-md);
+          height: 140px;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(0,0,0,0.2);
+          background: rgba(0,0,0,0.3);
           cursor: pointer;
           transition: var(--transition);
           overflow: hidden;
         }
-        .file-upload-zone:hover { border-color: var(--primary); background: rgba(0,0,0,0.3); }
-        .upload-btn { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: var(--text-dim); cursor: pointer; }
+        .file-upload-zone:hover { border-color: var(--primary); background: rgba(0,0,0,0.4); }
+        .upload-btn { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; color: var(--text-dim); transition: 0.2s; }
+        .upload-btn:hover { color: var(--text-main); }
         .preview-img { width: 100%; height: 100%; object-fit: cover; }
         
         .gallery-previews { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; align-items: center; padding: 0.5rem; }
-        .thumb-preview { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; }
+        .thumb-preview { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         
-        .charities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
-        .charity-item { padding: 1.5rem !important; display: flex; flex-direction: column; gap: 1rem; }
-        .item-header { display: flex; align-items: center; gap: 1rem; }
-        .item-icon { width: 44px; height: 44px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: var(--error); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
-        .admin-charity-img { width: 100%; height: 100%; object-fit: cover; }
-        .item-title { flex: 1; }
-        .item-title h4 { margin: 0; font-size: 1rem; }
-        .item-title span { font-size: 0.75rem; color: var(--text-dim); }
-        .item-actions { display: flex; gap: 0.25rem; }
-        .item-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; min-height: 3em; }
-        .item-footer { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid var(--glass-border); padding-top: 1rem; }
+        .charities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem; }
+        .premium-card { 
+          padding: 0 !important; 
+          display: flex; 
+          flex-direction: column; 
+          overflow: hidden; 
+          border: 1px solid rgba(255,255,255,0.08);
+          transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+          position: relative;
+        }
+        .premium-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        .premium-card.is-featured { border-color: rgba(245, 158, 11, 0.3); }
+        
+        .featured-ribbon {
+          position: absolute;
+          top: 1rem; right: -2rem;
+          background: var(--accent);
+          color: white;
+          padding: 0.25rem 3rem;
+          font-size: 0.65rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          transform: rotate(45deg);
+          z-index: 10;
+          display: flex; align-items: center; gap: 0.5rem;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .modal-content { width: 100%; max-width: 500px; padding: 2.5rem !important; position: relative; }
-        .modal-header { display: flex; gap: 1rem; margin-bottom: 2rem; }
-        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem; }
+        .item-visual { height: 180px; position: relative; overflow: hidden; background: rgba(0,0,0,0.2); }
+        .admin-charity-img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
+        .premium-card:hover .admin-charity-img { transform: scale(1.1); }
+        .placeholder-visual { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-dim); }
+        
+        .category-pill { position: absolute; bottom: 1rem; left: 1rem; background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.65rem; font-weight: 800; z-index: 2; }
+
+        .item-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; flex: 1; }
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+        .item-title h4 { margin: 0 0 0.25rem; font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
+        .reg-id { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+        
+        .item-actions { display: flex; gap: 0.4rem; }
+        .icon-btn { 
+          width: 32px; height: 32px; 
+          display: flex; align-items: center; justify-content: center; 
+          border-radius: 8px; background: rgba(255,255,255,0.03); 
+          color: var(--text-dim); 
+          transition: 0.2s; 
+        }
+        .icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+        .action-featured.active { color: var(--accent); background: rgba(245, 158, 11, 0.15); }
+        .action-edit:hover { color: var(--primary); }
+        .action-delete:hover { color: var(--error); background: rgba(239, 68, 68, 0.1); }
+
+        .item-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin: 0; min-height: 3.2em; }
+        
+        .item-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.25rem; }
+        .stat-pill { display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+        .stat-pill.highlight { color: var(--error); }
+        .stat-pill span { color: var(--text-main); }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.85); backdrop-filter: blur(12px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-content { width: 100%; max-width: 550px; padding: 2.5rem !important; position: relative; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem; }
+        .close-btn { position: absolute; right: 1.5rem; top: 1.5rem; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
+        .close-btn:hover { color: var(--text-main); transform: rotate(90deg); }
         
         .event-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 0.5rem; }
         .event-info { display: flex; flex-direction: column; }

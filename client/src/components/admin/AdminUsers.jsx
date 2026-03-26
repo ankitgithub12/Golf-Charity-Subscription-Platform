@@ -160,14 +160,14 @@ const AdminUsers = () => {
                     <button className="icon-btn" title="Manage Scores" onClick={() => { setSelectedUser(user); fetchUserScores(user._id); }}>
                       <Trophy size={16} />
                     </button>
-                    <button className="icon-btn" title="Edit Profile" onClick={() => handleEditClick(user)}>
+                    <button className="icon-btn action-edit" title="Edit Profile" onClick={() => handleEditClick(user)}>
                       <Edit2 size={16} />
                     </button>
-                    <button className="icon-btn" title="Toggle Admin" onClick={() => toggleAdmin(user._id, user.role)}>
+                    <button className="icon-btn action-shield" title="Toggle Admin" onClick={() => toggleAdmin(user._id, user.role)}>
                       <Shield size={16} />
                     </button>
                     <button 
-                      className={`icon-btn ${user.isActive ? 'delete' : 'success'}`} 
+                      className={`icon-btn action-status ${user.isActive ? 'delete' : 'success'}`} 
                       title={user.isActive ? "Disable User" : "Enable User"} 
                       onClick={() => toggleStatus(user._id, user.isActive)}
                     >
@@ -225,8 +225,8 @@ const AdminUsers = () => {
             <div className="modal-header">
               <Edit2 size={20} className="text-primary" />
               <div>
-                <h3>Edit User Profile</h3>
-                <p>Modify user details and account status</p>
+                <h3 style={{ color: 'var(--text-main)', marginBottom: '0.25rem' }}>Edit User Profile</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Modify user details and account status</p>
               </div>
               <button type="button" className="close-btn" onClick={() => setEditingUser(null)}><X size={20} /></button>
             </div>
@@ -278,17 +278,34 @@ const AdminUsers = () => {
               </div>
               {editFormData.role !== 'admin' && (
                 <div className="form-group">
-                  <label className="form-label">Subscription Status</label>
+                  <label className="form-label" style={{ color: 'var(--text-main)', fontWeight: '600' }}>Subscription Status</label>
                   <select 
                     className="form-input"
                     value={editFormData.subscriptionStatus}
                     onChange={(e) => setEditFormData({...editFormData, subscriptionStatus: e.target.value})}
+                    style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
                   >
                     <option value="none">None</option>
                     <option value="active">Active</option>
                     <option value="cancelled">Cancelled</option>
                     <option value="past_due">Past Due</option>
                   </select>
+                </div>
+              )}
+
+              {/* Mini Charity Card */}
+              {editingUser.selectedCharity && (
+                <div className="mini-charity-section" style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                  <label className="form-label" style={{ color: 'var(--primary)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem', display: 'block' }}>Supporting Charity</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justify_content: 'center', color: 'white' }}>
+                      <Heart size={20} fill="currentColor" />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{editingUser.selectedCharity.name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Actively receiving user contributions</div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -333,14 +350,23 @@ const AdminUsers = () => {
         .role-tag.user { background: var(--glass); color: var(--text-muted); }
         
         .action-btns { display: flex; gap: 0.5rem; }
+        .icon-btn { color: var(--text-muted); opacity: 0.8; }
+        .icon-btn:hover { opacity: 1; color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .icon-btn.action-edit:hover { color: var(--primary); }
+        .icon-btn.action-shield:hover { color: var(--accent); }
+        .icon-btn.action-status.success:hover { color: var(--success); }
+        .icon-btn.action-status.delete:hover { color: var(--error); }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .modal-content { width: 100%; max-width: 500px; padding: 2rem !important; position: relative; }
-        .modal-header { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-start; }
-        .modal-header h3 { margin: 0; font-size: 1.25rem; }
-        .modal-header p { margin: 0; font-size: 0.8125rem; color: var(--text-dim); }
-        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.85); backdrop-filter: blur(12px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-content { width: 100%; max-width: 500px; padding: 2.5rem !important; position: relative; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; gap: 1rem; margin-bottom: 2rem; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem; }
+        .close-btn { position: absolute; right: 1.5rem; top: 1.5rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
+        .close-btn:hover { color: var(--text-main); transform: rotate(90deg); }
         
+        .form-label { color: var(--text-main); font-weight: 500; }
+        .form-input { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); color: var(--text-main); }
+        .form-input:focus { border-color: var(--primary); background: rgba(0,0,0,0.4); }
+
         .admin-scores-list { display: flex; flex-direction: column; gap: 0.75rem; }
         .admin-score-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border); }
         .score-val { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }

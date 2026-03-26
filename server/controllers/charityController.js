@@ -175,6 +175,14 @@ const addEvent = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Event title and date are required' });
     }
 
+    const eventDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+
+    if (eventDate < today) {
+      return res.status(400).json({ success: false, message: 'Event date cannot be in the past' });
+    }
+
     const charity = await Charity.findByIdAndUpdate(
       req.params.id,
       { $push: { events: { title, description: description || '', date, location: location || '' } } },
