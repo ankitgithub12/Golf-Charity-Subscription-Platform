@@ -45,11 +45,32 @@ const register = async (req, res) => {
         email: user.email,
         subject: 'Welcome to Golf Charity!',
         message: `
-          <h1>Welcome ${user.name}!</h1>
-          <p>Your account has been created successfully.</p>
-          <p>You can now subscribe to a plan and start supporting your favorite charities while playing for big prizes!</p>
-          <br/>
-          <p>Best Regards,<br/>Golf Charity Team</p>
+          <div style="background-color: #020617; padding: 40px 20px; font-family: 'Inter', sans-serif, Arial; color: #f8fafc; text-align: center;">
+            <div style="max-width: 500px; margin: 0 auto; background-color: #1e293b; border-radius: 16px; padding: 40px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+              <div style="background: linear-gradient(135deg, #10b981, #f59e0b); width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 32px;">⛳</div>
+              <h1 style="color: #ffffff; font-size: 28px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.025em;">Welcome, ${user.name}!</h1>
+              <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
+                Your account has been created successfully. You're now part of a community that plays golf to make a difference.
+              </p>
+              <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 32px; text-align: left;">
+                <p style="color: #10b981; font-weight: 600; margin: 0 0 8px 0; font-size: 14px; text-transform: uppercase;">Next Steps:</p>
+                <ul style="color: #cbd5e1; margin: 0; padding-left: 20px; font-size: 14px;">
+                  <li style="margin-bottom: 8px;">Pick a subscription plan</li>
+                  <li style="margin-bottom: 8px;">Select your favorite charity</li>
+                  <li>Enter your golf scores to win!</li>
+                </ul>
+              </div>
+              <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard" 
+                 style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 14px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: background-color 0.3s ease;">
+                 Visit Dashboard
+              </a>
+              <div style="margin-top: 40px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 24px;">
+                <p style="color: #64748b; font-size: 13px; margin: 0;">
+                  Sent with ❤️ from the Golf Charity Team
+                </p>
+              </div>
+            </div>
+          </div>
         `
       });
     } catch (emailErr) {
@@ -160,9 +181,28 @@ const forgotPassword = async (req, res) => {
     const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
 
     const message = `
-      <h1>You have requested a password reset</h1>
-      <p>Please go to this link to reset your password:</p>
-      <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+      <div style="background-color: #020617; padding: 40px 20px; font-family: 'Inter', sans-serif, Arial; color: #f8fafc; text-align: center;">
+        <div style="max-width: 500px; margin: 0 auto; background-color: #1e293b; border-radius: 16px; padding: 40px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+          <div style="background: rgba(245, 158, 11, 0.1); width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 1px solid rgba(245, 158, 11, 0.2);">🔑</div>
+          <h1 style="color: #ffffff; font-size: 26px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.025em;">Password Reset</h1>
+          <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
+            We received a request to reset your password. Click the button below to choose a new one. This link will expire in 10 minutes.
+          </p>
+          <a href="${resetUrl}" 
+             style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 14px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: background-color 0.3s ease;">
+             Reset Password
+          </a>
+          <p style="color: #64748b; font-size: 13px; margin-top: 32px;">
+            If you didn't request this, you can safely ignore this email.
+          </p>
+          <div style="margin-top: 40px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 24px;">
+            <p style="color: #64748b; font-size: 12px; margin: 0; word-break: break-all;">
+              Or copy this link: <br/>
+              <span style="color: #10b981;">${resetUrl}</span>
+            </p>
+          </div>
+        </div>
+      </div>
     `;
 
     try {

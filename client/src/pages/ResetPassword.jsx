@@ -25,7 +25,7 @@ const ResetPassword = () => {
 
     setLoading(true);
     try {
-      await axios.put(`/auth/resetpassword/${token}`, { password: formData.password });
+      await api.put(`/auth/resetpassword/${token}`, { password: formData.password });
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {

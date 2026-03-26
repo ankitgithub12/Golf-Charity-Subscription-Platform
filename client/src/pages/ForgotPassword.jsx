@@ -13,7 +13,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('/auth/forgotpassword', { email });
+      await api.post('/auth/forgotpassword', { email });
       setSubmitted(true);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Something went wrong. Please try again.');

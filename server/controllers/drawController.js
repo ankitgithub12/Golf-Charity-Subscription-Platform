@@ -159,12 +159,31 @@ const publishDraw = async (req, res) => {
               email: user.email,
               subject: `🏆 You Won in the ${draw.month} Golf Draw!`,
               message: `
-                <h2>Huge Congratulations, ${user.name}!</h2>
-                <p>You matched <strong>${matchType}</strong> in the latest Golf Charity draw.</p>
-                <p>Your winnings: <strong>₹${(prize / 100).toFixed(2)}</strong> have been added to your profile.</p>
-                <p>Log in to your dashboard to view your results and claim your prize.</p>
-                <br/>
-                <p>Keep playing and supporting your favorite charities!</p>
+                <div style="background-color: #020617; padding: 40px 20px; font-family: 'Inter', sans-serif, Arial; color: #f8fafc; text-align: center;">
+                  <div style="max-width: 500px; margin: 0 auto; background-color: #1e293b; border-radius: 16px; padding: 40px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                    <div style="background: rgba(245, 158, 11, 0.1); width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 1px solid rgba(245, 158, 11, 0.2);">🏆</div>
+                    <h1 style="color: #ffffff; font-size: 28px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.025em;">Congratulations, ${user.name}!</h1>
+                    <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
+                      You matched <span style="color: #f59e0b; font-weight: 700;">${matchType}</span> in the latest Golf Charity draw!
+                    </p>
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                      <p style="color: #94a3b8; font-size: 14px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em;">Your Prize Winnings:</p>
+                      <p style="color: #10b981; font-size: 36px; font-weight: 800; margin: 0;">₹${(prize / 100).toFixed(2)}</p>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 32px;">
+                      Your winnings have been automatically added to your profile. Join the next draw to keep supporting charities and winning big!
+                    </p>
+                    <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard" 
+                       style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 14px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: background-color 0.3s ease;">
+                       Claim Your Prize
+                    </a>
+                    <div style="margin-top: 40px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 24px;">
+                      <p style="color: #64748b; font-size: 13px; margin: 0;">
+                        The Golf Charity Winners Circle
+                      </p>
+                    </div>
+                  </div>
+                </div>
               `
             });
           } catch (emailErr) {
@@ -201,11 +220,33 @@ const publishDraw = async (req, res) => {
             email: sub.userId.email,
             subject: `📢 Draw Results for ${draw.month} are OUT!`,
             message: `
-              <h2>The ${draw.month} Results are LIVE!</h2>
-              <p>Hello ${sub.userId.name}, the winning numbers for this month are: <strong>${draw.numbers.join(', ')}</strong></p>
-              <p>Head over to your dashboard to see if you've won a piece of the <strong>₹${(pool.totalPool / 100).toFixed(2)}</strong> prize pool!</p>
-              <br/>
-              <p><a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard" clicktracking=off>View My Dashboard</a></p>
+              <div style="background-color: #020617; padding: 40px 20px; font-family: 'Inter', sans-serif, Arial; color: #f8fafc; text-align: center;">
+                <div style="max-width: 500px; margin: 0 auto; background-color: #1e293b; border-radius: 16px; padding: 40px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                  <div style="background: rgba(16, 185, 129, 0.1); width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 1px solid rgba(16, 185, 129, 0.2);">📢</div>
+                  <h1 style="color: #ffffff; font-size: 26px; font-weight: 700; margin-bottom: 16px;">The ${draw.month} Results are LIVE!</h1>
+                  <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
+                    Hello ${sub.userId.name}, the winning numbers for this month's draw have been announced.
+                  </p>
+                  <div style="background: rgba(0, 0, 0, 0.2); border: 1px dotted rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                    <p style="color: #94a3b8; font-size: 13px; margin: 0 0 12px 0; text-transform: uppercase;">Winning Numbers</p>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                      ${draw.numbers.map(n => `<span style="display: inline-block; width: 40px; height: 40px; line-height: 40px; background: #10b981; color: white; border-radius: 50%; font-weight: 700; font-size: 18px; margin: 0 4px;">${n}</span>`).join('')}
+                    </div>
+                  </div>
+                  <p style="color: #94a3b8; font-size: 14px; margin-bottom: 32px;">
+                    Head over to your dashboard to see if your luck came through for the <span style="color: #f59e0b; font-weight: 600;">₹${(pool.totalPool / 100).toFixed(2)}</span> prize pool!
+                  </p>
+                  <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard" 
+                     style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 14px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: background-color 0.3s ease;">
+                     Check My Results
+                  </a>
+                  <div style="margin-top: 40px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 24px;">
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">
+                      Good luck for the next one!
+                    </p>
+                  </div>
+                </div>
+              </div>
             `
           });
         }
