@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion, useScroll, useSpring } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, LogOut, User as UserIcon, LayoutDashboard, Heart, Trophy, CreditCard } from 'lucide-react';
+import { Menu, X, LogOut, User as UserIcon, LayoutDashboard, Heart, Trophy, CreditCard, Clock } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -10,11 +11,17 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Calculate days until end of month for the badge
+  const daysUntilDraw = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() - new Date().getDate();
 
   const handleLogout = () => {
     logout();
@@ -40,6 +47,7 @@ const Navbar = () => {
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+      <motion.div className="scroll-progress-bar" style={{ scaleX }} />
       <div className="container nav-content">
         <Link to="/" className="logo" onClick={() => setIsOpen(false)}>
           <span className="logo-icon">⛳</span>
@@ -51,6 +59,11 @@ const Navbar = () => {
           {navLinks.map(link => (
             <Link key={link.path} to={link.path} className={location.pathname === link.path ? 'active' : ''}>
               {link.name}
+              {link.name === 'Draws' && (
+                <span className="nav-badge pulse">
+                  <Clock size={10} /> {daysUntilDraw}d
+                </span>
+              )}
             </Link>
           ))}
           <div className="nav-divider"></div>
@@ -140,15 +153,45 @@ const Navbar = () => {
         .logo-text span {
           color: var(--primary);
         }
+        .scroll-progress-bar {
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+          transform-origin: 0%;
+          z-index: 1001;
+        }
         .nav-links.desktop {
           display: flex;
           align-items: center;
           gap: 2rem;
         }
         .nav-links.desktop a {
+          position: relative;
           font-size: 0.9375rem;
           font-weight: 500;
           color: var(--text-muted);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .nav-badge {
+          font-size: 0.65rem;
+          padding: 0.15rem 0.4rem;
+          background: rgba(16, 185, 129, 0.15);
+          color: var(--primary);
+          border-radius: 4px;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+          70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
         .nav-links.desktop a:hover, .nav-links.desktop a.active {
           color: var(--text-main);

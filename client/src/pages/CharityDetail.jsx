@@ -15,12 +15,14 @@ const CharityDetail = () => {
   const [selecting, setSelecting] = useState(false);
   const [donateAmount, setDonateAmount] = useState('');
   const [donating, setDonating] = useState(false);
+  const [activeImage, setActiveImage] = useState('');
 
   useEffect(() => {
     const fetchCharity = async () => {
       try {
         const res = await api.get(`/charities/${id}`);
         setCharity(res.data.charity);
+        setActiveImage(res.data.charity.coverImage);
       } catch (err) {
         toast.error("Charity not found");
         navigate('/charities');
@@ -67,8 +69,10 @@ const CharityDetail = () => {
 
     try {
       setDonating(true);
-      await api.post(`/charities/${id}/donate`, { amount: donateAmount });
-      toast.success(`Thank you for your donation of ₹${donateAmount}!`);
+      // Convert INR to Paise (100x)
+      const amountPaise = Math.round(parseFloat(donateAmount) * 100);
+      await api.post(`/charities/${id}/donate`, { amount: amountPaise });
+      toast.success(`Thank you for your donation of ₹${parseFloat(donateAmount).toFixed(2)}!`);
       setDonateAmount('');
       // Refresh charity stats
       const res = await api.get(`/charities/${id}`);
@@ -110,10 +114,24 @@ const CharityDetail = () => {
 
           <div className="detail-image glass-card">
             <img 
-              src={charity.coverImage || "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&q=80&w=1200"} 
+              src={activeImage || charity.coverImage || "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&q=80&w=1200"} 
               alt={charity.name} 
             />
           </div>
+
+          {charity.images?.length > 1 && (
+            <div className="image-gallery">
+              {[charity.coverImage, ...charity.images.filter(img => img !== charity.coverImage)].map((img, i) => (
+                <div 
+                  key={i} 
+                  className={`gallery-thumb ${activeImage === img ? 'active' : ''}`}
+                  onClick={() => setActiveImage(img)}
+                >
+                  <img src={img} alt={`Gallery ${i}`} />
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="detail-content">
             <h3>About the Cause</h3>
@@ -238,6 +256,12 @@ const CharityDetail = () => {
           margin-bottom: 3rem;
         }
         .detail-image img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .image-gallery { display: flex; gap: 1rem; margin-bottom: 3rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .gallery-thumb { width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+        .gallery-thumb:hover { border-color: var(--primary-light); }
+        .gallery-thumb.active { border-color: var(--primary); transform: scale(1.05); }
+        .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
         
         .description {
           font-size: 1.125rem;

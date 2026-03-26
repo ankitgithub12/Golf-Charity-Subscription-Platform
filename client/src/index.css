@@ -25,6 +25,16 @@
 
   /* Transitions */
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  
+  /* Match Tiers */
+  --tier-5: #f59e0b;
+  --tier-4: #8b5cf6;
+  --tier-3: #3b82f6;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 * {
@@ -154,15 +164,52 @@ button {
   background-color: var(--primary-dark);
 }
 
-.btn-secondary {
-  background-color: var(--glass);
-  border: 1px solid var(--glass-border);
-  color: var(--text-main);
-}
-
 .btn-secondary:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
+
+/* Luxury Shimmer Effect */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 45%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.1) 55%,
+    transparent 100%
+  );
+  transform: rotate(45deg);
+  animation: shimmer 4s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { transform: translate(-100%, -100%) rotate(45deg); }
+  20%, 100% { transform: translate(100%, 100%) rotate(45deg); }
+}
+
+/* Match Tiers */
+.match-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.match-badge.5-match { background: rgba(245, 158, 11, 0.1); color: var(--tier-5); border: 1px solid rgba(245, 158, 11, 0.2); }
+.match-badge.4-match { background: rgba(139, 92, 246, 0.1); color: var(--tier-4); border: 1px solid rgba(139, 92, 246, 0.2); }
+.match-badge.3-match { background: rgba(59, 130, 246, 0.1); color: var(--tier-3); border: 1px solid rgba(59, 130, 246, 0.2); }
 
 /* Animations */
 @keyframes fadeIn {

@@ -1,6 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { getUsers, getUserById, updateUser, getAnalytics, editScore, deleteScore } = require('../controllers/adminController');
+const { 
+  getUsers, 
+  getUserById, 
+  updateUser, 
+  getAnalytics, 
+  editScore, 
+  deleteScore,
+  getWinners,
+  updateWinnerPayout
+} = require('../controllers/adminController');
 const { getScoresByUser } = require('../controllers/scoreController');
 const { protect, adminOnly } = require('../middleware/auth');
 
@@ -8,6 +17,8 @@ const { protect, adminOnly } = require('../middleware/auth');
 router.use(protect, adminOnly);
 
 router.get('/analytics', getAnalytics);
+router.get('/winners', getWinners);
+router.put('/winners/:id/payout', updateWinnerPayout);
 router.get('/users', getUsers);
 router.get('/users/:id', getUserById);
 router.put('/users/:id', updateUser);

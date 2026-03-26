@@ -15,12 +15,19 @@ const AdminCharities = () => {
     category: 'health',
     website: '',
     registrationNumber: '',
+    coverImage: '',
+    images: '', // Comma-separated string in form, array in state
     featured: false
   });
   const [selectedCharity, setSelectedCharity] = useState(null);
   const [showEventForm, setShowEventForm] = useState(false);
   const [eventData, setEventData] = useState({ title: '', date: '', location: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
+  
+  // File Upload States
+  const [coverFile, setCoverFile] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]);
+  const [previews, setPreviews] = useState({ cover: '', gallery: [] });
 
   useEffect(() => {
     fetchCharities();
@@ -40,23 +47,41 @@ const AdminCharities = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    
+    const form = new FormData();
+    Object.keys(formData).forEach(key => {
+      if (key !== 'images') form.append(key, formData[key]);
+    });
+
+    if (coverFile) form.append('coverImage', coverFile);
+    if (galleryFiles.length > 0) {
+      galleryFiles.forEach(file => form.append('images', file));
+    }
+
     try {
       if (editingId) {
-        await api.put(`/charities/${editingId}`, formData);
+        await api.put(`/charities/${editingId}`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
         toast.success("Charity updated");
       } else {
-        await api.post('/charities', formData);
+        await api.post('/charities', form, { headers: { 'Content-Type': 'multipart/form-data' } });
         toast.success("Charity created");
       }
       setShowForm(false);
       setEditingId(null);
-      setFormData({ name: '', description: '', category: 'health', website: '', registrationNumber: '' });
+      resetForm();
       fetchCharities();
     } catch (err) {
       toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '', category: 'health', website: '', registrationNumber: '', featured: false });
+    setCoverFile(null);
+    setGalleryFiles([]);
+    setPreviews({ cover: '', gallery: [] });
   };
 
   const handleEdit = (charity) => {
@@ -66,6 +91,11 @@ const AdminCharities = () => {
       category: charity.category || 'health',
       website: charity.website || '',
       registrationNumber: charity.registrationNumber || '',
+      featured: charity.featured || false
+    });
+    setPreviews({
+      cover: charity.coverImage || '',
+      gallery: charity.images || []
     });
     setEditingId(charity._id);
     setShowForm(true);
@@ -115,7 +145,11 @@ const AdminCharities = () => {
   return (
     <div className="admin-charities animate-fade-in">
       <div className="section-actions">
-        <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); }}>
+        <button className="btn btn-primary" onClick={() => { 
+          if(showForm) resetForm();
+          setShowForm(!showForm); 
+          setEditingId(null); 
+        }}>
           {showForm ? 'Cancel' : <><Plus size={18} /> Add New Charity</>}
         </button>
       </div>
@@ -165,6 +199,69 @@ const AdminCharities = () => {
                 <input type="text" className="form-input" value={formData.registrationNumber} onChange={e => setFormData({...formData, registrationNumber: e.target.value})} />
               </div>
             </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Cover Image</label>
+                <div className="file-upload-zone">
+                  <input 
+                    type="file" 
+                    id="cover-upload" 
+                    hidden 
+                    accept="image/*" 
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setCoverFile(file);
+                        setPreviews(p => ({ ...p, cover: URL.createObjectURL(file) }));
+                      }
+                    }}
+                  />
+                  <label htmlFor="cover-upload" className="upload-btn">
+                    {previews.cover ? (
+                      <img src={previews.cover} alt="Cover Preview" className="preview-img" />
+                    ) : (
+                      <>
+                        <ImageIcon size={24} />
+                        <span>Select Cover Image</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Gallery Images (Max 10)</label>
+                <div className="file-upload-zone">
+                  <input 
+                    type="file" 
+                    id="gallery-upload" 
+                    hidden 
+                    multiple 
+                    accept="image/*"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files);
+                      setGalleryFiles(files);
+                      setPreviews(p => ({ ...p, gallery: files.map(f => URL.createObjectURL(f)) }));
+                    }}
+                  />
+                  <label htmlFor="gallery-upload" className="upload-btn">
+                    <div className="gallery-previews">
+                      {previews.gallery.length > 0 ? (
+                        previews.gallery.slice(0, 4).map((url, i) => (
+                          <img key={i} src={url} alt="" className="thumb-preview" />
+                        ))
+                      ) : (
+                        <>
+                          <Plus size={24} />
+                          <span>Add Gallery Source</span>
+                        </>
+                      )}
+                      {previews.gallery.length > 4 && <span>+{previews.gallery.length - 4} more</span>}
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
             <button className="btn btn-primary btn-full" disabled={submitting}>
               {submitting ? <Loader className="animate-spin" /> : editingId ? 'Update Charity' : 'Create Charity'}
             </button>
@@ -174,9 +271,15 @@ const AdminCharities = () => {
 
       <div className="charities-grid">
         {charities.map(charity => (
-          <div key={charity._id} className="charity-item glass-card">
+          <div key={charity._id} className="charity-item glass-card hover-glow">
             <div className="item-header">
-              <div className="item-icon"><Heart size={20} /></div>
+              <div className="item-icon">
+                {charity.coverImage ? (
+                  <img src={charity.coverImage} alt={charity.name} className="admin-charity-img" />
+                ) : (
+                  <Heart size={20} />
+                )}
+              </div>
               <div className="item-title">
                 <h4>{charity.name}</h4>
                 <span className="capitalize">{charity.category}</span>
@@ -248,11 +351,31 @@ const AdminCharities = () => {
         .section-actions { margin-bottom: 2rem; }
         .form-wrapper { padding: 2.5rem !important; margin-bottom: 3rem; }
         .h-32 { height: 120px; resize: vertical; }
+
+        .file-upload-zone {
+          border: 2px dashed var(--glass-border);
+          border-radius: var(--radius-sm);
+          height: 120px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0,0,0,0.2);
+          cursor: pointer;
+          transition: var(--transition);
+          overflow: hidden;
+        }
+        .file-upload-zone:hover { border-color: var(--primary); background: rgba(0,0,0,0.3); }
+        .upload-btn { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: var(--text-dim); cursor: pointer; }
+        .preview-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .gallery-previews { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; align-items: center; padding: 0.5rem; }
+        .thumb-preview { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; }
         
         .charities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
         .charity-item { padding: 1.5rem !important; display: flex; flex-direction: column; gap: 1rem; }
         .item-header { display: flex; align-items: center; gap: 1rem; }
-        .item-icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: var(--error); display: flex; align-items: center; justify-content: center; }
+        .item-icon { width: 44px; height: 44px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: var(--error); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .admin-charity-img { width: 100%; height: 100%; object-fit: cover; }
         .item-title { flex: 1; }
         .item-title h4 { margin: 0; font-size: 1rem; }
         .item-title span { font-size: 0.75rem; color: var(--text-dim); }

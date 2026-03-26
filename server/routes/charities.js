@@ -26,8 +26,8 @@ router.post('/select', protect, subscribed, validate(charitySelectSchema), selec
 router.post('/:id/donate', protect, donate);
 
 // Admin CRUD
-router.post('/', protect, adminOnly, uploadCharityImage.single('coverImage'), validate(charitySchema), createCharity);
-router.put('/:id', protect, adminOnly, uploadCharityImage.single('coverImage'), updateCharity);
+router.post('/', protect, adminOnly, uploadCharityImage.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'images', maxCount: 10 }]), validate(charitySchema), createCharity);
+router.put('/:id', protect, adminOnly, uploadCharityImage.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'images', maxCount: 10 }]), updateCharity);
 router.delete('/:id', protect, adminOnly, deleteCharity);
 
 // Admin — events management

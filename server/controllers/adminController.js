@@ -16,8 +16,8 @@ const getUsers = async (req, res) => {
     const search = req.query.search || '';
 
     const filter = search
-      ? { $or: [{ name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }] }
-      : {};
+      ? { role: 'user', $or: [{ name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }] }
+      : { role: 'user' };
 
     const total = await User.countDocuments(filter);
     const users = await User.find(filter)
@@ -176,4 +176,55 @@ const deleteScore = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUserById, updateUser, getAnalytics, editScore, deleteScore };
+/**
+ * GET /api/admin/winners — get all winner claims
+ */
+const getWinners = async (req, res) => {
+  try {
+    const winners = await Winner.find()
+      .populate('userId', 'name email bankDetails')
+      .populate('drawId', 'month year status')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, winners });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * PUT /api/admin/winners/:id/payout — update winner payout status
+ */
+const updateWinnerPayout = async (req, res) => {
+  try {
+    const { payoutStatus, verificationStatus, adminNote } = req.body;
+    const winner = await Winner.findById(req.params.id);
+    if (!winner) return res.status(404).json({ success: false, message: 'Winner not found' });
+
+    if (payoutStatus) {
+      winner.payoutStatus = payoutStatus;
+      if (payoutStatus === 'paid') winner.paidAt = new Date();
+    }
+    if (verificationStatus) {
+      winner.verificationStatus = verificationStatus;
+      winner.verifiedBy = req.user._id;
+      winner.verifiedAt = new Date();
+    }
+    if (adminNote !== undefined) winner.adminNote = adminNote;
+
+    await winner.save();
+    res.json({ success: true, message: 'Winner payout updated', winner });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { 
+  getUsers, 
+  getUserById, 
+  updateUser, 
+  getAnalytics, 
+  editScore, 
+  deleteScore,
+  getWinners,
+  updateWinnerPayout
+};

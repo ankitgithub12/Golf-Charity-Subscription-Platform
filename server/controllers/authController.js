@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
+const sendEmail = require('../utils/sendEmail');
 
 // Helper — sign JWT
 const signToken = (id) =>
@@ -36,6 +38,23 @@ const register = async (req, res) => {
 
     const user = await User.create({ name, email, password, role });
     const token = signToken(user._id);
+
+    // PRD Requirement: Notify user via email on registration (Section 13)
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Welcome to Golf Charity!',
+        message: `
+          <h1>Welcome ${user.name}!</h1>
+          <p>Your account has been created successfully.</p>
+          <p>You can now subscribe to a plan and start supporting your favorite charities while playing for big prizes!</p>
+          <br/>
+          <p>Best Regards,<br/>Golf Charity Team</p>
+        `
+      });
+    } catch (emailErr) {
+      console.error('Welcome email failed:', emailErr.message);
+    }
 
     res.status(201).json({
       success: true,
@@ -121,4 +140,89 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, updateProfile };
+/**
+ * POST /api/auth/forgotpassword
+ */
+const forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'There is no user with that email' });
+    }
+
+    // Get reset token
+    const resetToken = user.getResetPasswordToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    // Create reset url
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+
+    const message = `
+      <h1>You have requested a password reset</h1>
+      <p>Please go to this link to reset your password:</p>
+      <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+    `;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Password reset token',
+        message
+      });
+
+      res.status(200).json({ success: true, message: 'Email sent' });
+    } catch (err) {
+      console.log(err);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({ success: false, message: 'Email could not be sent' });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * PUT /api/auth/resetpassword/:resettoken
+ */
+const resetPassword = async (req, res) => {
+  try {
+    // Get hashed token
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(req.params.resettoken)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid token' });
+    }
+
+    if (req.body.password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+    }
+
+    // Set new password
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    const token = signToken(user._id);
+
+    res.status(200).json({ success: true, token });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { register, login, getMe, updateProfile, forgotPassword, resetPassword };

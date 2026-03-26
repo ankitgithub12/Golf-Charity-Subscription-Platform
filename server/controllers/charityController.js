@@ -42,10 +42,14 @@ const createCharity = async (req, res) => {
   try {
     const data = { ...req.body };
 
-    // Handle uploaded cover image
-    if (req.file) {
-      data.coverImage = req.file.path;
-      data.images = [req.file.path];
+    // Handle uploaded images from Cloudinary (using multer.fields)
+    if (req.files) {
+      if (req.files.coverImage && req.files.coverImage[0]) {
+        data.coverImage = req.files.coverImage[0].path;
+      }
+      if (req.files.images) {
+        data.images = req.files.images.map(f => f.path);
+      }
     }
 
     const charity = await Charity.create(data);
@@ -61,8 +65,15 @@ const createCharity = async (req, res) => {
 const updateCharity = async (req, res) => {
   try {
     const data = { ...req.body };
-    if (req.file) {
-      data.coverImage = req.file.path;
+    if (req.files) {
+      if (req.files.coverImage && req.files.coverImage[0]) {
+        data.coverImage = req.files.coverImage[0].path;
+      }
+      if (req.files.images) {
+        // Option A: Replace all gallery images
+        data.images = req.files.images.map(f => f.path);
+        // Option B: Append? Let's stick with replace for admin simplicity for now.
+      }
     }
 
     const charity = await Charity.findByIdAndUpdate(req.params.id, data, {

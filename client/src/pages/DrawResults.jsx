@@ -56,7 +56,7 @@ const DrawResults = () => {
                 <Users size={18} />
                 <div>
                   <span className="label">Participants</span>
-                  <span className="val">{draws[0].results?.subscriberCount || 0}</span>
+                  <span className="val">{draws[0].pool?.subscriberCount || 0}</span>
                 </div>
               </div>
               <div className="h-stat">
@@ -69,6 +69,11 @@ const DrawResults = () => {
               {draws[0].jackpotCarriedOver && (
                 <div className="jackpot-alert">
                   <Trophy size={14} /> Jackpot Rolled Over!
+                </div>
+              )}
+              {draws[0].blockchainHash && (
+                <div className="blockchain-badge" title={draws[0].blockchainHash}>
+                  <Shield size={14} /> <span>Verified Hash: {draws[0].blockchainHash.substring(0, 12)}...</span>
                 </div>
               )}
             </div>
@@ -93,6 +98,8 @@ const DrawResults = () => {
             </div>
             <div className="row-stats">
               <span className="row-pool">₹{((draw.pool?.totalPool || 0) / 100).toFixed(0)}</span>
+              {draw.blockchainHash && <span className="row-hash">Hash: {draw.blockchainHash.substring(0, 8)}...</span>}
+              <span className="row-participants">{draw.pool?.subscriberCount || 0} Participants</span>
               <span className="row-winners">{draw.results?.fiveMatch?.length || 0} Jackpots</span>
             </div>
             <ChevronRight className="row-arrow" size={18} />
@@ -190,8 +197,24 @@ const DrawResults = () => {
         }
         .row-stats { display: flex; flex-direction: column; align-items: flex-end; }
         .row-pool { font-weight: 800; color: var(--primary); }
+        .row-hash { font-size: 0.65rem; color: var(--text-dim); font-family: monospace; letter-spacing: 0.05em; margin: 0.25rem 0; }
+        .row-participants { font-size: 0.75rem; color: var(--text-muted); }
         .row-winners { font-size: 0.75rem; color: var(--text-dim); }
         .row-arrow { color: var(--text-dim); }
+
+        .blockchain-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: var(--primary);
+          font-size: 0.75rem;
+          font-weight: 700;
+          padding: 0.4rem 0.8rem;
+          background: rgba(16, 185, 129, 0.05);
+          border-radius: 4px;
+          border: 1px solid rgba(16, 185, 129, 0.15);
+          margin-top: 1rem;
+        }
 
         .no-draws { text-align: center; color: var(--text-dim); }
         .no-draws p { margin-top: 1rem; font-size: 1.125rem; }

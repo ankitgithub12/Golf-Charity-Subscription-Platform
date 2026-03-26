@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, ArrowRight, Loader } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -61,14 +62,25 @@ const Login = () => {
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon" />
                 <input 
-                  type="password" 
+                  type={showPassword ? 'text' : 'password'} 
                   className="form-input" 
                   placeholder="••••••••"
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
+                <button 
+                  type="button" 
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
+            </div>
+
+            <div className="forgot-link-wrap">
+              <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
             </div>
 
             <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
@@ -124,6 +136,36 @@ const Login = () => {
         .btn-full {
           width: 100%;
           margin-top: 1rem;
+        }
+        .forgot-link-wrap {
+          text-align: right;
+          margin-top: 0.25rem;
+        }
+        .forgot-link {
+          font-size: 0.875rem;
+          color: var(--primary);
+          font-weight: 500;
+          text-decoration: none;
+          transition: opacity 0.2s;
+        }
+        .forgot-link:hover { opacity: 0.75; }
+        .password-toggle {
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: var(--text-dim);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          transition: var(--transition);
+        }
+        .password-toggle:hover {
+          color: var(--primary);
         }
         .auth-footer {
           margin-top: 2rem;

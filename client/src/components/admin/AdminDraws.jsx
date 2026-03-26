@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Play, Send, AlertTriangle, Loader, CheckCircle } from 'lucide-react';
+import { Trophy, Play, Send, AlertTriangle, Loader, CheckCircle, Shield } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -110,6 +110,7 @@ const AdminDraws = () => {
               <div className="sim-stat"><span>5 Matches:</span> <strong>{simResults.tier5Count}</strong></div>
               <div className="sim-stat"><span>4 Matches:</span> <strong>{simResults.tier4Count}</strong></div>
               <div className="sim-stat"><span>3 Matches:</span> <strong>{simResults.tier3Count}</strong></div>
+              <div className="sim-stat"><span>Total Participants:</span> <strong>{simResults.participantCount}</strong></div>
               <div className="sim-pool">Expected Pool: ₹{(simResults.totalPool / 100).toFixed(2)}</div>
             </div>
           )}
@@ -138,8 +139,10 @@ const AdminDraws = () => {
                 <th>Month</th>
                 <th>Type</th>
                 <th>Numbers</th>
+                <th>Participants</th>
                 <th>Winners</th>
                 <th>Pool</th>
+                <th>Audit Trail</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -149,8 +152,17 @@ const AdminDraws = () => {
                   <td><strong>{draw.month}</strong></td>
                   <td><span className="capitalize">{draw.drawType}</span></td>
                   <td><div className="num-row">{draw.numbers.map(n => <span key={n}>{n}</span>)}</div></td>
+                  <td>{draw.pool?.subscriberCount || 0}</td>
                   <td>{(draw.results?.fiveMatch?.length || 0) + (draw.results?.fourMatch?.length || 0) + (draw.results?.threeMatch?.length || 0)}</td>
                   <td>₹{(draw.results?.totalPool / 100 || 0).toFixed(0)}</td>
+                  <td>
+                    {draw.blockchainHash ? (
+                      <div className="audit-hash" title={draw.blockchainHash}>
+                        <Shield size={12} className="text-primary" />
+                        <span>{draw.blockchainHash.substring(0, 8)}...</span>
+                      </div>
+                    ) : <span className="text-dim">-</span>}
+                  </td>
                   <td><span className={`status-pill ${draw.status}`}>{draw.status}</span></td>
                 </tr>
               ))}
@@ -181,6 +193,9 @@ const AdminDraws = () => {
         td { padding: 1rem; font-size: 0.875rem; border-bottom: 1px solid var(--glass-border); }
         .num-row { display: flex; gap: 4px; }
         .num-row span { width: 20px; height: 20px; background: var(--glass); font-size: 0.65rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        .audit-hash { display: flex; align-items: center; gap: 0.4rem; font-family: monospace; font-size: 0.75rem; color: var(--text-dim); }
+        .text-primary { color: var(--primary); }
         
         .status-pill.published { color: var(--primary); }
         .status-pill.draft { color: var(--accent); }

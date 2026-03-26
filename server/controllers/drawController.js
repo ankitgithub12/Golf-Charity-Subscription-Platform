@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const Draw = require('../models/Draw');
 const PrizePool = require('../models/PrizePool');
 const Winner = require('../models/Winner');
@@ -5,6 +6,7 @@ const User = require('../models/User');
 const Subscription = require('../models/Subscription');
 const { randomDraw, algorithmicDraw, matchSubscribers } = require('../services/drawEngine');
 const { calculatePrizePool, buildWinnerAmounts } = require('../services/prizeCalculator');
+const sendEmail = require('../utils/sendEmail');
 
 /**
  * POST /api/draws/generate  [admin]
@@ -78,7 +80,7 @@ const simulateDraw = async (req, res) => {
       message: 'Simulation complete',
       simulation: {
         drawnNumbers: draw.numbers,
-        subscribersChecked: subscriberIds.length,
+        participantCount: subscriberIds.length,
         tier5Count: results.fiveMatch.length,
         tier4Count: results.fourMatch.length,
         tier3Count: results.threeMatch.length,
@@ -148,7 +150,27 @@ const publishDraw = async (req, res) => {
           { upsert: true, new: true }
         );
         // Add prize to user's total winnings
-        await User.findByIdAndUpdate(userId, { $inc: { totalWinnings: prize } });
+        const user = await User.findByIdAndUpdate(userId, { $inc: { totalWinnings: prize } });
+
+        // PRD Requirement: Notify winner via email (Section 13)
+        if (prize > 0 && user) {
+          try {
+            await sendEmail({
+              email: user.email,
+              subject: `🏆 You Won in the ${draw.month} Golf Draw!`,
+              message: `
+                <h2>Huge Congratulations, ${user.name}!</h2>
+                <p>You matched <strong>${matchType}</strong> in the latest Golf Charity draw.</p>
+                <p>Your winnings: <strong>₹${(prize / 100).toFixed(2)}</strong> have been added to your profile.</p>
+                <p>Log in to your dashboard to view your results and claim your prize.</p>
+                <br/>
+                <p>Keep playing and supporting your favorite charities!</p>
+              `
+            });
+          } catch (emailErr) {
+            console.error(`Failed to notify winner ${userId}:`, emailErr.message);
+          }
+        }
       }
     };
 
@@ -156,13 +178,41 @@ const publishDraw = async (req, res) => {
     await createWinners(results.fourMatch, '4-match', perWinner.fourMatch);
     await createWinners(results.threeMatch, '3-match', perWinner.threeMatch);
 
+    // Generate Simulated Blockchain Hash (SHA-256)
+    const hashInput = `${draw._id}-${draw.numbers.join(',')}-${Date.now()}`;
+    const blockchainHash = crypto.createHash('sha256').update(hashInput).digest('hex');
+
     // Update draw document
     draw.results = results;
     draw.status = 'published';
     draw.publishedAt = new Date();
+    draw.blockchainHash = blockchainHash;
     draw.jackpotCarriedOver = jackpotRolls;
     draw.carriedOverAmount = jackpotRolls ? pool.fiveMatchPool : 0;
     await draw.save();
+
+    // PRD Requirement: General Draw Results Notification (Section 13)
+    // Notify all active subscribers that results are out
+    try {
+      const allSubscribers = await Subscription.find({ status: 'active' }).populate('userId', 'email name');
+      for (const sub of allSubscribers) {
+        if (sub.userId) {
+          await sendEmail({
+            email: sub.userId.email,
+            subject: `📢 Draw Results for ${draw.month} are OUT!`,
+            message: `
+              <h2>The ${draw.month} Results are LIVE!</h2>
+              <p>Hello ${sub.userId.name}, the winning numbers for this month are: <strong>${draw.numbers.join(', ')}</strong></p>
+              <p>Head over to your dashboard to see if you've won a piece of the <strong>₹${(pool.totalPool / 100).toFixed(2)}</strong> prize pool!</p>
+              <br/>
+              <p><a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard" clicktracking=off>View My Dashboard</a></p>
+            `
+          });
+        }
+      }
+    } catch (notifyErr) {
+        console.error('General draw notification failed:', notifyErr.message);
+    }
 
     res.json({
       success: true,
@@ -184,7 +234,16 @@ const getDraws = async (req, res) => {
   try {
     const filter = req.user?.role === 'admin' ? {} : { status: 'published' };
     const draws = await Draw.find(filter).sort({ createdAt: -1 }).populate('createdBy', 'name');
-    res.json({ success: true, draws });
+    
+    // Attach pool data to each draw for subscriberCount/participants
+    const drawsWithPool = await Promise.all(
+      draws.map(async (d) => {
+        const pool = await PrizePool.findOne({ drawId: d._id });
+        return { ...d.toObject(), pool };
+      })
+    );
+    
+    res.json({ success: true, draws: drawsWithPool });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

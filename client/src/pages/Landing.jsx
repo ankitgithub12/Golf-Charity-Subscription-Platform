@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Trophy, Heart, Target, ChevronRight, CheckCircle, ExternalLink, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import CountdownTimer from '../components/common/CountdownTimer';
 
 const Landing = () => {
   const fadeInUp = {
@@ -52,6 +53,13 @@ const Landing = () => {
               <Link to="/charities" className="btn btn-secondary">
                 Explore Charities
               </Link>
+            </div>
+            
+            <div className="hero-countdown-wrapper">
+              <CountdownTimer 
+                targetDate={new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59)} 
+                label="Next Big Draw In"
+              />
             </div>
             <div className="hero-stats">
               <div className="stat">
@@ -219,6 +227,10 @@ const Landing = () => {
         .btn-large {
           padding: 1rem 2rem;
           font-size: 1.125rem;
+        }
+        .hero-countdown-wrapper {
+          max-width: 400px;
+          margin-bottom: 3.5rem;
         }
         .hero-stats {
           display: flex;

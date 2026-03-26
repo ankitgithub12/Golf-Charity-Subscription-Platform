@@ -6,13 +6,17 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Charities from './pages/CharityListing';
 import CharityDetail from './pages/CharityDetail';
 import Subscribe from './pages/Subscribe';
 import Dashboard from './pages/Dashboard';
-import Draws from './pages/DrawResults';
+import DrawResults from './pages/DrawResults';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import WinnerUpload from './pages/WinnerUpload';
+import InfoPages from './pages/InfoPages';
+import NotFound from './pages/NotFound';
 
 // Admin Sub-components for nested routing
 import AdminOverview from './components/admin/AdminOverview';
@@ -29,9 +33,13 @@ const App = () => {
         <Route index element={<Landing />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password/:token" element={<ResetPassword />} />
         <Route path="charities" element={<Charities />} />
         <Route path="charities/:id" element={<CharityDetail />} />
-        <Route path="draws" element={<Draws />} />
+        <Route path="draws" element={<DrawResults />} />
+        <Route path="faq" element={<InfoPages type="faq" />} />
+        <Route path="terms" element={<InfoPages type="terms" />} />
 
         {/* Protected Auth Routes */}
         <Route path="subscribe" element={
@@ -64,6 +72,9 @@ const App = () => {
           <Route path="charities" element={<AdminCharities />} />
           <Route path="winners" element={<AdminWinners />} />
         </Route>
+
+        {/* 404 Catch All */}
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );

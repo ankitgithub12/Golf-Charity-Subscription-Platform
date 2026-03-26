@@ -10,6 +10,9 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userScores, setUserScores] = useState([]);
   const [scoresLoading, setScoresLoading] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editFormData, setEditFormData] = useState({ name: '', email: '', role: 'user', isActive: true, subscriptionStatus: 'none' });
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -44,6 +47,55 @@ const AdminUsers = () => {
       toast.success(`User ${newStatus ? 'enabled' : 'disabled'}`);
     } catch (err) {
       toast.error("Failed to update status");
+    }
+  };
+
+  const fetchUserScores = async (userId) => {
+    setScoresLoading(true);
+    try {
+      const res = await api.get(`/admin/users/${userId}`);
+      setUserScores(res.data.scores || []);
+    } catch (err) {
+      toast.error("Failed to load user scores");
+    } finally {
+      setScoresLoading(false);
+    }
+  };
+
+  const deleteUserScore = async (scoreId) => {
+    if (!window.confirm("Delete this score?")) return;
+    try {
+      await api.delete(`/admin/scores/${scoreId}`);
+      setUserScores(userScores.filter(s => s._id !== scoreId));
+      toast.success("Score deleted");
+    } catch (err) {
+      toast.error("Failed to delete score");
+    }
+  };
+
+  const handleEditClick = (user) => {
+    setEditFormData({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      subscriptionStatus: user.subscriptionStatus || 'none'
+    });
+    setEditingUser(user);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    setSavingEdit(true);
+    try {
+      const res = await api.put(`/admin/users/${editingUser._id}`, editFormData);
+      setUsers(users.map(u => u._id === editingUser._id ? res.data.user : u));
+      toast.success("User updated successfully");
+      setEditingUser(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update user");
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -108,6 +160,9 @@ const AdminUsers = () => {
                     <button className="icon-btn" title="Manage Scores" onClick={() => { setSelectedUser(user); fetchUserScores(user._id); }}>
                       <Trophy size={16} />
                     </button>
+                    <button className="icon-btn" title="Edit Profile" onClick={() => handleEditClick(user)}>
+                      <Edit2 size={16} />
+                    </button>
                     <button className="icon-btn" title="Toggle Admin" onClick={() => toggleAdmin(user._id, user.role)}>
                       <Shield size={16} />
                     </button>
@@ -163,12 +218,101 @@ const AdminUsers = () => {
           </div>
         </div>
       )}
+      
+      {editingUser && (
+        <div className="modal-overlay">
+          <form className="modal-content glass-card edit-user-modal" onSubmit={handleSaveEdit}>
+            <div className="modal-header">
+              <Edit2 size={20} className="text-primary" />
+              <div>
+                <h3>Edit User Profile</h3>
+                <p>Modify user details and account status</p>
+              </div>
+              <button type="button" className="close-btn" onClick={() => setEditingUser(null)}><X size={20} /></button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input 
+                  type="email" 
+                  className="form-input" 
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Role</label>
+                  <select 
+                    className="form-input"
+                    value={editFormData.role}
+                    onChange={(e) => setEditFormData({...editFormData, role: e.target.value})}
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Account Status</label>
+                  <select 
+                    className="form-input"
+                    value={editFormData.isActive ? 'true' : 'false'}
+                    onChange={(e) => setEditFormData({...editFormData, isActive: e.target.value === 'true'})}
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Subscription Status</label>
+                <select 
+                  className="form-input"
+                  value={editFormData.subscriptionStatus}
+                  onChange={(e) => setEditFormData({...editFormData, subscriptionStatus: e.target.value})}
+                >
+                  <option value="none">None</option>
+                  <option value="active">Active</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="past_due">Past Due</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ marginTop: '2rem' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setEditingUser(null)}>Cancel</button>
+              <button type="submit" className="btn btn-primary" disabled={savingEdit}>
+                {savingEdit ? <Loader className="animate-spin" size={16} /> : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <style>{`
         .table-controls { padding: 1rem 1.5rem !important; margin-bottom: 2rem; }
         .search-box { position: relative; max-width: 400px; }
         .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
         .search-box .form-input { padding-left: 3rem; background: rgba(0,0,0,0.2); }
+        select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .btn-full { width: 100%; }
+        .modal-footer { display: flex; gap: 1rem; }
+        .modal-footer .btn { flex: 1; justify-content: center; }
 
         .table-wrapper { padding: 0 !important; overflow: hidden; }
         .admin-table { width: 100%; border-collapse: collapse; text-align: left; }

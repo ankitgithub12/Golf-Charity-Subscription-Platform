@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User, ArrowRight, Loader, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader, CheckCircle, Eye, EyeOff, Shield, KeyRound } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CharitySelectModal from '../components/common/CharitySelectModal';
 
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [selectedRole, setSelectedRole] = useState('user');
+  const [adminSecret, setAdminSecret] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -39,11 +41,19 @@ const Register = () => {
     if (formData.password.length < 8) {
       return toast.error("Password must be at least 8 characters");
     }
+    if (selectedRole === 'admin' && !adminSecret.trim()) {
+      return toast.error("Admin secret key is required");
+    }
     setLoading(true);
     try {
-      await register(formData.name, formData.email, formData.password);
-      toast.success('Account created! Let\'s choose a charity.');
-      setShowCharityModal(true);
+      await register(formData.name, formData.email, formData.password, selectedRole === 'admin' ? adminSecret : '');
+      if (selectedRole === 'admin') {
+        toast.success('Admin account created!');
+        navigate('/admin');
+      } else {
+        toast.success('Account created! Let\'s choose a charity.');
+        setShowCharityModal(true);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -96,6 +106,27 @@ const Register = () => {
             </div>
 
             <form className="auth-form" onSubmit={handleSubmit}>
+
+              {/* Role Selector */}
+              <div className="form-group">
+                <label className="form-label">Account Type</label>
+                <div className="role-toggle">
+                  <button
+                    type="button"
+                    className={`role-btn ${selectedRole === 'user' ? 'active' : ''}`}
+                    onClick={() => { setSelectedRole('user'); setAdminSecret(''); }}
+                  >
+                    <User size={16} /> Player
+                  </button>
+                  <button
+                    type="button"
+                    className={`role-btn ${selectedRole === 'admin' ? 'active admin-active' : ''}`}
+                    onClick={() => setSelectedRole('admin')}
+                  >
+                    <Shield size={16} /> Admin
+                  </button>
+                </div>
+              </div>
               <div className="form-group">
                 <label className="form-label">Full Name</label>
                 <div className="input-with-icon">
@@ -178,6 +209,25 @@ const Register = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Admin Secret – only shown when admin role selected */}
+              {selectedRole === 'admin' && (
+                <div className="form-group admin-secret-field">
+                  <label className="form-label">Admin Secret Key</label>
+                  <div className="input-with-icon">
+                    <KeyRound size={18} className="input-icon" />
+                    <input
+                      type="password"
+                      className="form-input"
+                      placeholder="Enter admin secret key"
+                      value={adminSecret}
+                      onChange={(e) => setAdminSecret(e.target.value)}
+                      required={selectedRole === 'admin'}
+                    />
+                  </div>
+                  <p className="admin-hint">Contact your platform administrator for the secret key.</p>
+                </div>
+              )}
 
               <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
                 {loading ? <Loader className="animate-spin" /> : <>Create Account <ArrowRight size={18} /></>}
@@ -316,6 +366,53 @@ const Register = () => {
         }
         .password-toggle:hover {
           color: var(--primary);
+        }
+
+        /* Role Selector */
+        .role-toggle {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          border-radius: 10px;
+          padding: 0.35rem;
+        }
+        .role-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 0.625rem 1rem;
+          border: none;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          background: transparent;
+          color: var(--text-muted);
+          transition: all 0.2s;
+        }
+        .role-btn.active {
+          background: var(--primary);
+          color: #fff;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .role-btn.admin-active {
+          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Admin secret field */
+        .admin-secret-field {
+          border: 1px solid rgba(99,102,241,0.3);
+          border-radius: 10px;
+          padding: 1rem;
+          background: rgba(99,102,241,0.05);
+        }
+        .admin-hint {
+          font-size: 0.75rem;
+          color: var(--text-dim);
+          margin-top: 0.4rem;
         }
         @keyframes spin {
           from { transform: rotate(0deg); }

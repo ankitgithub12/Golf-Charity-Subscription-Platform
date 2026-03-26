@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Loader } from 'lucide-react';
 
 const ScoreForm = ({ onAdd, loading, initialValues = null, isEditing = false }) => {
+  const today = new Date().toISOString().split('T')[0];
   const [value, setValue] = useState('');
-  const [datePlayed, setDatePlayed] = useState(new Date().toISOString().split('T')[0]);
+  const [datePlayed, setDatePlayed] = useState(today);
   const [notes, setNotes] = useState('');
 
   // Pre-fill when editing an existing score
@@ -13,7 +14,7 @@ const ScoreForm = ({ onAdd, loading, initialValues = null, isEditing = false }) 
       setDatePlayed(
         initialValues.datePlayed
           ? new Date(initialValues.datePlayed).toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0]
+          : today
       );
       setNotes(initialValues.notes ?? '');
     }
@@ -55,6 +56,8 @@ const ScoreForm = ({ onAdd, loading, initialValues = null, isEditing = false }) 
             type="date" 
             className="form-input" 
             required 
+            max={today}
+            min="2020-01-01"
             value={datePlayed}
             onChange={(e) => setDatePlayed(e.target.value)}
           />

@@ -60,6 +60,10 @@ const drawSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    blockchainHash: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
