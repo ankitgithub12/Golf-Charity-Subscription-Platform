@@ -1,11 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Shield, Star, Zap, Loader } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const Subscribe = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(null); // 'monthly' | 'yearly'
+
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      toast.error("Admins do not need subscriptions");
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const plans = [
     {

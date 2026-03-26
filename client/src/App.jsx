@@ -43,7 +43,7 @@ const App = () => {
 
         {/* Protected Auth Routes */}
         <Route path="subscribe" element={
-          <ProtectedRoute>
+          <ProtectedRoute disallowAdmin>
             <Subscribe />
           </ProtectedRoute>
         } />

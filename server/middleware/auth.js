@@ -39,7 +39,7 @@ const adminOnly = (req, res, next) => {
  * Active subscriber guard — ensures user has an active subscription
  */
 const subscribed = (req, res, next) => {
-  if (req.user && req.user.subscriptionStatus === 'active') return next();
+  if (req.user && (req.user.subscriptionStatus === 'active' || req.user.role === 'admin')) return next();
   return res.status(403).json({
     success: false,
     message: 'An active subscription is required to access this feature',

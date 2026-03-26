@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 /**
  * Higher-order component to protect routes based on authentication and roles
  */
-const ProtectedRoute = ({ children, requireAdmin = false, requireSubscription = false }) => {
+const ProtectedRoute = ({ children, requireAdmin = false, requireSubscription = false, disallowAdmin = false }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
@@ -20,6 +20,11 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireSubscription = 
   // Not logged in
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Admin access restricted for this route
+  if (disallowAdmin && user.role === 'admin') {
+    return <Navigate to="/admin" replace />;
   }
 
   // Admin role required

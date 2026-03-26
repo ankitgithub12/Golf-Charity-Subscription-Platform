@@ -11,6 +11,9 @@ const createCheckoutSession = async (req, res) => {
   try {
     const { planType } = req.body; // 'monthly' | 'yearly'
     const user = req.user;
+    if (user.role === 'admin') {
+      return res.status(403).json({ success: false, message: 'Admins cannot create subscriptions' });
+    }
 
     const priceId =
       planType === 'yearly'
@@ -157,6 +160,9 @@ const handleWebhook = async (req, res) => {
  */
 const cancelSubscription = async (req, res) => {
   try {
+    if (req.user.role === 'admin') {
+      return res.status(403).json({ success: false, message: 'Admins cannot perform subscription actions' });
+    }
     const sub = await Subscription.findOne({ userId: req.user._id, status: 'active' });
     if (!sub)
       return res.status(404).json({ success: false, message: 'No active subscription found' });
@@ -191,6 +197,9 @@ const getSubscriptionStatus = async (req, res) => {
  */
 const verifySession = async (req, res) => {
   try {
+    if (req.user.role === 'admin') {
+      return res.status(403).json({ success: false, message: 'Admins cannot perform subscription actions' });
+    }
     const { sessionId } = req.body;
     if (!sessionId) return res.status(400).json({ success: false, message: 'Missing session ID' });
 

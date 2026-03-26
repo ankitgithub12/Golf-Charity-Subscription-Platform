@@ -39,7 +39,7 @@ const Navbar = () => {
     user.role === 'admin' 
       ? { name: 'Admin Panel', path: '/admin', icon: <UserIcon size={18} /> }
       : { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
-    { name: 'Subscribe', path: '/subscribe', icon: <CreditCard size={18} /> },
+    ...(user.role !== 'admin' ? [{ name: 'Subscribe', path: '/subscribe', icon: <CreditCard size={18} /> }] : []),
   ] : [
     { name: 'Login', path: '/login' },
     { name: 'Join Now', path: '/register', className: 'btn btn-primary' },

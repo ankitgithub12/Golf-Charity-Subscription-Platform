@@ -276,19 +276,21 @@ const AdminUsers = () => {
                   </select>
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Subscription Status</label>
-                <select 
-                  className="form-input"
-                  value={editFormData.subscriptionStatus}
-                  onChange={(e) => setEditFormData({...editFormData, subscriptionStatus: e.target.value})}
-                >
-                  <option value="none">None</option>
-                  <option value="active">Active</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="past_due">Past Due</option>
-                </select>
-              </div>
+              {editFormData.role !== 'admin' && (
+                <div className="form-group">
+                  <label className="form-label">Subscription Status</label>
+                  <select 
+                    className="form-input"
+                    value={editFormData.subscriptionStatus}
+                    onChange={(e) => setEditFormData({...editFormData, subscriptionStatus: e.target.value})}
+                  >
+                    <option value="none">None</option>
+                    <option value="active">Active</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="past_due">Past Due</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer" style={{ marginTop: '2rem' }}>

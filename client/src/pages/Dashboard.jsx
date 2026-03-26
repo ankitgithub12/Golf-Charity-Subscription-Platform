@@ -132,27 +132,28 @@ const Dashboard = () => {
               </div>
               <div className="stat-text">
                 <h3>Draw Eligibility</h3>
-                <p>{scores.length < 5 ? `Add ${5 - scores.length} more scores to enter.` : "You're all set for the next draw!"}</p>
+                <p>{user?.role === 'admin' ? "Admin bypass active — you're eligible for all draws." : scores.length < 5 ? `Add ${5 - scores.length} more scores to enter.` : "You're all set for the next draw!"}</p>
               </div>
             </div>
           </div>
 
-          {/* Impact Meter */}
-          <div className="stat-card impact glass-card highlight">
-            <div className="stat-main">
-              <div className="impact-meter">
-                 <div className="liquid-container">
-                    <div className="liquid" style={{ height: `${user?.charityContributionPct || 10}%` }}></div>
-                 </div>
-                 <Heart size={20} className="pulse-heart" />
-              </div>
-              <div className="stat-text">
-                <h3>Your Impact</h3>
-                <p>Contributing <strong className="text-primary">{user?.charityContributionPct || 10}%</strong> of sub fees to your charity.</p>
-                <div className="impact-val">{formatCurrency(user?.totalDonated || 0)} Donated</div>
+          {user?.role !== 'admin' && (
+            <div className="stat-card impact glass-card highlight">
+              <div className="stat-main">
+                <div className="impact-meter">
+                   <div className="liquid-container">
+                      <div className="liquid" style={{ height: `${user?.charityContributionPct || 10}%` }}></div>
+                   </div>
+                   <Heart size={20} className="pulse-heart" />
+                </div>
+                <div className="stat-text">
+                  <h3>Your Impact</h3>
+                  <p>Contributing <strong className="text-primary">{user?.charityContributionPct || 10}%</strong> of sub fees to your charity.</p>
+                  <div className="impact-val">{formatCurrency(user?.totalDonated || 0)} Donated</div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -220,41 +221,43 @@ const Dashboard = () => {
           {/* Next Draw Countdown */}
           <CountdownTimer targetDate={new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59)} />
 
-          {/* Premium Membership Card */}
-          <div className={`side-card membership-card ${user?.subscriptionStatus}`}>
-            <div className="membership-overlay"></div>
-            <div className="card-top">
-              <div className="status-indicator">
-                {user?.subscriptionStatus === 'active' ? <Trophy size={20} className="icon-gold" /> : <CreditCard size={20} />}
-                <span className="membership-label">Digital Membership</span>
-              </div>
-              <span className={`status-pill ${user?.subscriptionStatus}`}>{user?.subscriptionStatus}</span>
-            </div>
-            
-            {subscription ? (
-              <div className="membership-body">
-                <div className="plan-name">{subscription.planType} Plan</div>
-                <div className="validity-box">
-                  <div className="validity-header">
-                    <span>Account Validity</span>
-                    <span className="date">{new Date(subscription.currentPeriodEnd).toLocaleDateString()}</span>
-                  </div>
-                  <div className="validity-progress">
-                    <div className="progress-fill" style={{ width: '85%' }}></div>
-                  </div>
-                  <p className="validity-note">Your access is secured until renewal.</p>
+          {/* Premium Membership Card - Hidden for Admin */}
+          {user?.role !== 'admin' && (
+            <div className={`side-card membership-card ${user?.subscriptionStatus}`}>
+              <div className="membership-overlay"></div>
+              <div className="card-top">
+                <div className="status-indicator">
+                  {user?.subscriptionStatus === 'active' ? <Trophy size={20} className="icon-gold" /> : <CreditCard size={20} />}
+                  <span className="membership-label">Digital Membership</span>
                 </div>
-                <Link to="/subscribe" className="manage-link">
-                  Manage Subscription <ExternalLink size={12} />
-                </Link>
+                <span className={`status-pill ${user?.subscriptionStatus}`}>{user?.subscriptionStatus}</span>
               </div>
-            ) : (
-              <div className="membership-empty">
-                <p>Unlock premium draws, higher prize pools, and community impact.</p>
-                <Link to="/subscribe" className="btn btn-primary btn-full mt-2">Activate Now</Link>
-              </div>
-            )}
-          </div>
+              
+              {subscription ? (
+                <div className="membership-body">
+                  <div className="plan-name">{subscription?.planType} Plan</div>
+                  <div className="validity-box">
+                    <div className="validity-header">
+                      <span>Account Validity</span>
+                      <span className="date">{new Date(subscription?.currentPeriodEnd).toLocaleDateString()}</span>
+                    </div>
+                    <div className="validity-progress">
+                      <div className="progress-fill" style={{ width: '100%' }}></div>
+                    </div>
+                    <p className="validity-note">Your access is secured until renewal.</p>
+                  </div>
+                  <Link to="/subscribe" className="manage-link">
+                    Manage Subscription <ExternalLink size={12} />
+                  </Link>
+                </div>
+              ) : (
+                <div className="membership-empty">
+                  <p>Unlock premium draws, higher prize pools, and community impact.</p>
+                  <Link to="/subscribe" className="btn btn-primary btn-full mt-2">Activate Now</Link>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Participation Summary */}
           <div className="side-card participation-summary-card glass-card">
@@ -295,41 +298,43 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Charity Impact */}
-          <div className="side-card glass-card">
-            <div className="side-card-header">
-              <div className="icon-heart-glow">
-                <Heart size={18} className="pulse-heart" />
+          {/* Charity Impact - Hidden for Admin */}
+          {user?.role !== 'admin' && (
+            <div className="side-card glass-card">
+              <div className="side-card-header">
+                <div className="icon-heart-glow">
+                  <Heart size={18} className="pulse-heart" />
+                </div>
+                <h4>Your Impact</h4>
               </div>
-              <h4>Your Impact</h4>
+              {user?.selectedCharity ? (
+                <div className="selected-charity-box">
+                  <div className="charity-mini">
+                    {user.selectedCharity.coverImage && <img src={user.selectedCharity.coverImage} alt="" />}
+                    <span>{user.selectedCharity.name}</span>
+                  </div>
+                  <div className="contribution-meter">
+                    <div className="meter-label">
+                      <span>Monthly Share</span>
+                      <span>{user.charityContributionPct}%</span>
+                    </div>
+                    <div className="meter-bar">
+                      <div className="meter-fill" style={{ width: `${user.charityContributionPct}%` }}></div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                    <Link to="/charities" className="sub-manage" style={{ marginTop: 0 }}>Change Charity</Link>
+                    <button className="sub-manage" style={{ background: 'none', border: 'none', cursor: 'pointer', marginTop: 0 }} onClick={() => { setNewPct(user.charityContributionPct); setShowContributionModal(true); }}>Adjust %</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="no-charity-warning">
+                  <p>Select a charity to start redirecting your fees.</p>
+                  <Link to="/charities" className="btn btn-secondary btn-sm">Browse Charities</Link>
+                </div>
+              )}
             </div>
-            {user?.selectedCharity ? (
-              <div className="selected-charity-box">
-                <div className="charity-mini">
-                  {user.selectedCharity.coverImage && <img src={user.selectedCharity.coverImage} alt="" />}
-                  <span>{user.selectedCharity.name}</span>
-                </div>
-                <div className="contribution-meter">
-                  <div className="meter-label">
-                    <span>Monthly Share</span>
-                    <span>{user.charityContributionPct}%</span>
-                  </div>
-                  <div className="meter-bar">
-                    <div className="meter-fill" style={{ width: `${user.charityContributionPct}%` }}></div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                  <Link to="/charities" className="sub-manage" style={{ marginTop: 0 }}>Change Charity</Link>
-                  <button className="sub-manage" style={{ background: 'none', border: 'none', cursor: 'pointer', marginTop: 0 }} onClick={() => { setNewPct(user.charityContributionPct); setShowContributionModal(true); }}>Adjust %</button>
-                </div>
-              </div>
-            ) : (
-              <div className="no-charity-warning">
-                <p>Select a charity to start redirecting your fees.</p>
-                <Link to="/charities" className="btn btn-secondary btn-sm">Browse Charities</Link>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Upcoming Draw */}
           <DrawCard latestDraw={latestDraw} />
