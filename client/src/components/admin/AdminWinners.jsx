@@ -113,7 +113,7 @@ const AdminWinners = () => {
                   </div>
                 </td>
                 <td>{winner.drawId?.month} {winner.drawId?.year}</td>
-                <td><span className={`match-badge ${winner.matchType}`}>{winner.matchType}</span></td>
+                <td><span className={`match-badge tier-${winner.matchType.split('-')[0]}`}>{winner.matchType}</span></td>
                 <td><strong className="text-primary">₹{(winner.prizeAmount / 100).toFixed(2)}</strong></td>
                 <td>
                     <div className="status-cell">
@@ -164,7 +164,7 @@ const AdminWinners = () => {
                 </div>
                 <div className="detail-item">
                   <span className="label">Match Tier</span>
-                  <div className="val"><span className={`match-badge ${selectedWinner.matchType}`}>{selectedWinner.matchType}</span></div>
+                  <div className="val"><span className={`match-badge tier-${selectedWinner.matchType.split('-')[0]}`}>{selectedWinner.matchType}</span></div>
                 </div>
                 <div className="detail-item">
                   <span className="label">Bank Details / UPI</span>
@@ -241,7 +241,7 @@ const AdminWinners = () => {
         .user-info .email { font-size: 0.75rem; color: var(--text-dim); }
         
         .match-badge { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.05); }
-        .match-badge.5-match { background: #f59e0b22; color: #f59e0b; }
+        .match-badge.tier-5 { background: #f59e0b22; color: #f59e0b; }
         
         .status-cell { display: flex; flex-direction: column; gap: 0.4rem; }
         .status-pill { font-size: 0.6rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid transparent; width: fit-content; text-transform: uppercase; }

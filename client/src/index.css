@@ -207,9 +207,9 @@ button {
   font-weight: 800;
   text-transform: uppercase;
 }
-.match-badge.5-match { background: rgba(245, 158, 11, 0.1); color: var(--tier-5); border: 1px solid rgba(245, 158, 11, 0.2); }
-.match-badge.4-match { background: rgba(139, 92, 246, 0.1); color: var(--tier-4); border: 1px solid rgba(139, 92, 246, 0.2); }
-.match-badge.3-match { background: rgba(59, 130, 246, 0.1); color: var(--tier-3); border: 1px solid rgba(59, 130, 246, 0.2); }
+.match-badge.tier-5 { background: rgba(245, 158, 11, 0.1); color: var(--tier-5); border: 1px solid rgba(245, 158, 11, 0.2); }
+.match-badge.tier-4 { background: rgba(139, 92, 246, 0.1); color: var(--tier-4); border: 1px solid rgba(139, 92, 246, 0.2); }
+.match-badge.tier-3 { background: rgba(59, 130, 246, 0.1); color: var(--tier-3); border: 1px solid rgba(59, 130, 246, 0.2); }
 
 /* Animations */
 @keyframes fadeIn {
