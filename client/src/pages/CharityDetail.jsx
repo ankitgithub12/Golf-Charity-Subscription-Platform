@@ -213,7 +213,7 @@ const CharityDetail = () => {
                   onClick={handleDonate}
                   disabled={donating || !donateAmount}
                 >
-                  {donating ? <Loader size={18} className="animate-spin" /> : <>Make Donation</>}
+                  {donating ? <Loader size={18} className="animate-spin" /> : 'Make Donation'}
                 </button>
               </div>
               <p className="impact-note">100% of direct donations go to the charity (minus transaction fees).</p>

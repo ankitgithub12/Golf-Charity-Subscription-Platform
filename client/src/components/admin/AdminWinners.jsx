@@ -240,29 +240,21 @@ const AdminWinners = () => {
         .user-info { display: flex; flex-direction: column; }
         .user-info .email { font-size: 0.75rem; color: var(--text-dim); }
         
-        .match-badge { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.05); }
-        .match-badge.tier-5 { background: #f59e0b22; color: #f59e0b; }
-        
         .status-cell { display: flex; flex-direction: column; gap: 0.4rem; }
-        .status-pill { font-size: 0.6rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid transparent; width: fit-content; text-transform: uppercase; }
-        .status-pill.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-        .status-pill.approved, .status-pill.paid { background: rgba(16, 185, 129, 0.1); color: var(--primary); }
-        .status-pill.rejected { background: rgba(239, 68, 68, 0.1); color: var(--error); }
 
         .actions { display: flex; gap: 0.75rem; align-items: center; }
-        .btn-sm { padding: 0.5rem 0.75rem !important; font-size: 0.75rem !important; }
 
         /* Modal Styles */
         .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.9); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .modal-content { width: 100%; max-width: 600px; padding: 2rem; max-height: 90vh; overflow-y: auto; }
+        .modal-content { width: 100%; max-width: 600px; padding: 2rem; max-height: 90vh; overflow-y: auto; position: relative; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .close-btn { background: transparent; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; }
+        .close-btn { background: transparent; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; position: absolute; right: 1.5rem; top: 1.5rem; }
         
         .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
         .detail-item .label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); font-weight: 800; display: block; margin-bottom: 0.5rem; }
         .detail-item .val { font-size: 1.1rem; font-weight: 700; }
         
-        .bank-box { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border); font-family: monospace; font-size: 0.9rem !important; }
+        .bank-box { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border); font-family: monospace; font-size: 0.9rem !important; word-break: break-all; }
         
         .proof-container { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border); }
         .proof-img { width: 100%; height: auto; display: block; }

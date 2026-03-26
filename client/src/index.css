@@ -164,9 +164,93 @@ button {
   background-color: var(--primary-dark);
 }
 
-.btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+.btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
 }
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-error {
+  background-color: var(--error);
+  color: white;
+}
+
+.btn-error:hover { opacity: 0.9; }
+
+.btn-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+  background-color: var(--error);
+  color: white;
+}
+
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.8125rem; }
+.btn-full { width: 100%; }
+
+/* Icon Buttons */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  background: transparent;
+}
+
+.icon-btn:hover {
+  background: var(--glass);
+  color: var(--text-main);
+}
+
+.icon-btn.delete:hover {
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.icon-btn.featured {
+  color: var(--accent);
+}
+
+.icon-btn.success:hover {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+/* Status & Badges */
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.badge.error { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+.badge.warning { background: rgba(245, 158, 11, 0.1); color: var(--accent); }
+
+.status-pill {
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.status-pill.pending { background: rgba(245, 158, 11, 0.1); color: var(--accent); }
+.status-pill.paid, .status-pill.approved, .status-pill.published { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.status-pill.rejected { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+.status-pill.draft { background: var(--glass); color: var(--text-dim); }
 
 /* Luxury Shimmer Effect */
 .btn-shimmer {

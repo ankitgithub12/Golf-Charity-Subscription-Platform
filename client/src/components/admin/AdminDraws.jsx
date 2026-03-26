@@ -200,7 +200,7 @@ const AdminDraws = () => {
         .status-pill.published { color: var(--primary); }
         .status-pill.draft { color: var(--accent); }
         
-        .btn-danger:hover { background-color: var(--error) !important; color: white !important; }
+        .btn-danger:hover { opacity: 0.9; }
         
         @media (max-width: 1200px) { .draw-workflow { grid-template-columns: 1fr; } }
       `}</style>

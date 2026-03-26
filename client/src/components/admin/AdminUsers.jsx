@@ -310,7 +310,6 @@ const AdminUsers = () => {
 
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .form-group { margin-bottom: 1.25rem; }
-        .btn-full { width: 100%; }
         .modal-footer { display: flex; gap: 1rem; }
         .modal-footer .btn { flex: 1; justify-content: center; }
 
@@ -331,20 +330,14 @@ const AdminUsers = () => {
         .role-tag.admin { background: rgba(245, 158, 11, 0.1); color: var(--accent); }
         .role-tag.user { background: var(--glass); color: var(--text-muted); }
         
-        .badge.success { color: var(--primary); }
-        .badge.error { color: var(--error); }
-        
         .action-btns { display: flex; gap: 0.5rem; }
-        .icon-btn { padding: 0.5rem; color: var(--text-dim); border-radius: 4px; border: none; background: none; cursor: pointer; transition: var(--transition); }
-        .icon-btn:hover { background: var(--glass); color: var(--text-main); }
-        .icon-btn.delete:hover { color: var(--error); }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .modal-content { width: 100%; max-width: 500px; padding: 2rem !important; position: relative; }
         .modal-header { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-start; }
         .modal-header h3 { margin: 0; font-size: 1.25rem; }
         .modal-header p { margin: 0; font-size: 0.8125rem; color: var(--text-dim); }
-        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; }
+        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem; }
         
         .admin-scores-list { display: flex; flex-direction: column; gap: 0.75rem; }
         .admin-score-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--glass-border); }
@@ -352,7 +345,6 @@ const AdminUsers = () => {
         .score-info { flex: 1; display: flex; flex-direction: column; }
         .score-info span { font-size: 0.75rem; color: var(--text-dim); }
         .no-data { text-align: center; color: var(--text-dim); padding: 2rem; }
-        .text-primary { color: var(--primary); }
       `}</style>
     </div>
   );

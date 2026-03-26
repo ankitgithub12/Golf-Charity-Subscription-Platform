@@ -140,6 +140,18 @@ const AdminCharities = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this charity?")) return;
+    try {
+      await api.delete(`/charities/${id}`);
+      setCharities(charities.filter(c => c._id !== id));
+      if (selectedCharity?._id === id) setSelectedCharity(null);
+      toast.success("Charity deleted successfully");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete charity");
+    }
+  };
+
   if (loading) return <div className="loading-state"><Loader className="animate-spin" /></div>;
 
   return (
@@ -380,14 +392,13 @@ const AdminCharities = () => {
         .item-title h4 { margin: 0; font-size: 1rem; }
         .item-title span { font-size: 0.75rem; color: var(--text-dim); }
         .item-actions { display: flex; gap: 0.25rem; }
-        .icon-btn.featured { color: var(--accent); }
-        .item-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
+        .item-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; min-height: 3em; }
         .item-footer { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid var(--glass-border); padding-top: 1rem; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .modal-content { width: 100%; max-width: 500px; padding: 2.5rem !important; position: relative; }
         .modal-header { display: flex; gap: 1rem; margin-bottom: 2rem; }
-        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; }
+        .close-btn { position: absolute; right: 1rem; top: 1rem; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem; }
         
         .event-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 0.5rem; }
         .event-info { display: flex; flex-direction: column; }
