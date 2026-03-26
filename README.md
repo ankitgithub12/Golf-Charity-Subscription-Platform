@@ -4,6 +4,26 @@ A premium, full-stack MERN (MongoDB, Express, React, Node.js) platform designed 
 
 ---
 
+## 🚀 Live Demo
+
+- **Frontend**: [https://golf-charity-subscription-platform-1b16.onrender.com](https://golf-charity-subscription-platform-1b16.onrender.com)
+- **API Server**: [https://golf-charity-subscription-platform-server.onrender.com](https://golf-charity-subscription-platform-server.onrender.com)
+
+---
+
+## 💳 Testing Credentials
+
+To test the payment flow, use the following Stripe test card details:
+
+| Field          | Value                   |
+| -------------- | ----------------------- |
+| **Card Number** | `4242 4242 4242 4242`   |
+| **Expiry Date** | `12 / 26` (or any future) |
+| **CVC**         | `123`                   |
+| **ZIP Code**    | `90210`                 |
+
+---
+
 ## ✨ Features
 
 ### 👤 User Experience
